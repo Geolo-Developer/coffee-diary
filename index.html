@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>コーヒー物語日記</title>
+    <title>Daily Brew Logger</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -126,12 +126,6 @@
             font-weight: 600;
             color: var(--primary-color);
         }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
 
         .form-control {
             width: 100%;
@@ -140,36 +134,12 @@
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s ease;
-            background-color: white;
+            background-color: white; /* for select */
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--secondary-color);
-        }
-
-        .form-control:read-only {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-        
-        .ratio-input-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            align-items: end;
-        }
-        
-        .ratio-input-item {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .ratio-input-item label {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--primary-color);
         }
         
         .time-input-group {
@@ -452,12 +422,52 @@
             color: var(--text-color);
         }
 
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--secondary-color);
+            background: var(--bg-color);
+        }
+
         .api-settings {
             background: #f8f9f8;
             border: 2px solid var(--border-color);
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-indicator.connected {
+            background: #28a745;
         }
 
         #bean-list-container .bean-item, .method-item {
@@ -467,16 +477,9 @@
             padding: 10px;
             border-bottom: 1px solid var(--border-color);
         }
-        .bean-item > div:first-child {
-            flex-grow: 1;
-        }
         #bean-list-container .bean-item-details, .method-item-details {
             font-size: 0.8rem;
             color: #666;
-        }
-        #bean-list-container .bean-item-actions, .method-item-actions {
-            display: flex;
-            gap: 10px;
         }
          #bean-list-container .bean-item:last-child, .method-item:last-child {
             border-bottom: none;
@@ -515,6 +518,7 @@
             width: auto;
             min-width: 150px;
         }
+
 
         .modal {
             display: none;
@@ -602,6 +606,7 @@
             font-weight: bold;
         }
 
+
         .notification {
             position: fixed;
             top: 20px;
@@ -639,14 +644,9 @@
                 font-size: 2rem;
             }
 
-            .quick-record-section, .modal-grid, .record-item, .method-step, .form-grid {
+            .quick-record-section, .modal-grid, .record-item, .method-step {
                 grid-template-columns: 1fr;
                 gap: 20px;
-            }
-
-            .ratio-input-group {
-                grid-template-columns: 1fr;
-                gap: 15px;
             }
 
             .nav-tabs {
@@ -663,16 +663,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>☕ コーヒー物語日記</h1>
+            <h1>☕ Daily Brew Logger</h1>
             <p class="subtitle">毎日のコーヒー抽出を記録・分析して、理想の一杯を追求しよう</p>
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="coffeeLogger.showTab('record', event)">🚀 記録する</button>
-            <button class="nav-tab" onclick="coffeeLogger.showTab('taste-chart', event)">👅 豆ごとの味のチャート</button>
-            <button class="nav-tab" onclick="coffeeLogger.showTab('analytics', event)">📊 分析</button>
-            <button class="nav-tab" onclick="coffeeLogger.showTab('history', event)">📋 履歴</button>
-            <button class="nav-tab" onclick="coffeeLogger.showTab('settings', event)">⚙️ 設定</button>
+            <button class="nav-tab active" onclick="showTab('record', event)">🚀 記録する</button>
+            <button class="nav-tab" onclick="showTab('taste-chart', event)">👅 豆ごとの味のチャート</button>
+            <button class="nav-tab" onclick="showTab('analytics', event)">📊 分析</button>
+            <button class="nav-tab" onclick="showTab('history', event)">📋 履歴</button>
+            <button class="nav-tab" onclick="showTab('settings', event)">⚙️ 設定</button>
         </div>
 
         <!-- 記録タブ -->
@@ -709,21 +709,8 @@
                             <select id="bean-type" class="form-control"></select>
                         </div>
                         <div class="form-group">
-                            <label>豆・比率・お湯の量</label>
-                            <div class="ratio-input-group">
-                                <div class="ratio-input-item">
-                                    <label for="bean-weight">豆の量 (g)</label>
-                                    <input type="number" id="bean-weight" class="form-control" placeholder="15" step="0.1" oninput="calculateWaterAmount()">
-                                </div>
-                                <div class="ratio-input-item">
-                                    <label for="brew-ratio">比率 (1:)</label>
-                                    <input type="number" id="brew-ratio" class="form-control" placeholder="15" step="0.1" value="15" oninput="calculateWaterAmount()">
-                                </div>
-                                <div class="ratio-input-item">
-                                    <label for="water-weight">お湯の量 (g)</label>
-                                    <input type="number" id="water-weight" class="form-control" placeholder="225" readonly>
-                                </div>
-                            </div>
+                            <label for="bean-weight">豆の量 (g)</label>
+                            <input type="number" id="bean-weight" class="form-control" placeholder="例: 15" step="0.1">
                         </div>
                         <div class="form-group">
                             <label for="grind-size">挽き目</label>
@@ -744,6 +731,10 @@
                                 <option value="ステンレスフィルター">ステンレスフィルター</option>
                                 <option value="その他">その他</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="water-weight">お湯の量 (g)</label>
+                            <input type="number" id="water-weight" class="form-control" placeholder="例: 225">
                         </div>
                         <div class="form-group">
                             <label for="water-temperature">湯温 (°C)</label>
@@ -833,7 +824,7 @@
                     <div class="btn-group">
                         <input type="hidden" id="editing-record-id">
                         <button class="btn btn-secondary" onclick="loadLastRecipe()">📋 前回と同じ</button>
-                        <button id="save-btn" class="btn btn-primary" onclick="coffeeLogger.saveRecord()">💾 記録を保存</button>
+                        <button id="save-btn" class="btn btn-primary" onclick="handleSaveClick()">💾 記録を保存</button>
                     </div>
                 </div>
             </div>
@@ -861,6 +852,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- 分析タブ -->
         <div id="analytics" class="tab-content">
@@ -908,44 +900,40 @@
 
         <!-- 設定タブ -->
         <div id="settings" class="tab-content">
+             <div class="card">
+                <h3>⚙️ スプレッドシート連携</h3>
+                 <div class="api-settings">
+                    <div class="form-group">
+                        <label for="google-sheet-url">Googleスプレッドシート連携URL</label>
+                        <input type="url" id="google-sheet-url" class="form-control" placeholder="https://script.google.com/macros/s/...">
+                         <small style="color: #666; margin-top: 5px; display: block;">
+                            Google Apps Scriptで作成したウェブアプリのURLを貼り付けてください
+                        </small>
+                    </div>
+                    <div class="api-status">
+                        <span class="status-indicator" id="api-status-sheet"></span>
+                        <span id="api-status-text-sheet">未設定</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <h3>MY BEANS</h3>
                 <p>お持ちのコーヒー豆を登録・管理します。</p>
                 <div class="api-settings"> 
-                    <input type="hidden" id="editing-bean-index">
                     <div class="form-group">
-                        <label for="new-bean-name">豆の名前</label>
+                        <label for="new-bean-name">新しい豆の名前</label>
                         <input type="text" id="new-bean-name" class="form-control" placeholder="例: エチオピア イルガチェフェ">
                     </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="bean-url">豆のURL</label>
-                            <input type="url" id="bean-url" class="form-control" placeholder="https://...">
-                        </div>
-                        <div class="form-group">
-                            <label for="bean-image-url">画像URL</label>
-                            <input type="url" id="bean-image-url" class="form-control" placeholder="https://...">
-                        </div>
-                        <div class="form-group">
-                            <label for="shop-name">販売店名</label>
-                            <input type="text" id="shop-name" class="form-control" placeholder="例: ○○コーヒー">
-                        </div>
-                        <div class="form-group">
-                            <label for="shop-url">店のURL</label>
-                            <input type="url" id="shop-url" class="form-control" placeholder="https://...">
-                        </div>
-                    </div>
                     <div class="form-group">
-                        <label for="roast-level">焙煎度</label>
+                        <label for="roast-level">煎り度</label>
                         <select id="roast-level" class="form-control">
-                           <option value="ライト">ライト (Light)</option>
-                           <option value="シナモン">シナモン (Cinnamon)</option>
-                           <option value="ミディアム">ミディアム (Medium)</option>
-                           <option value="ハイ">ハイ (High)</option>
-                           <option value="シティ">シティ (City)</option>
-                           <option value="フルシティ">フルシティ (Full City)</option>
-                           <option value="フレンチ">フレンチ (French)</option>
-                           <option value="イタリアン">イタリアン (Italian)</option>
+                            <option value="浅煎り">浅煎り (Light)</option>
+                            <option value="中浅煎り">中浅煎り (Cinnamon)</option>
+                            <option value="中煎り">中煎り (Medium)</option>
+                            <option value="中深煎り">中深煎り (High)</option>
+                            <option value="深煎り">深煎り (City)</option>
+                            <option value="極深煎り">極深煎り (Full City)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -956,30 +944,7 @@
                             <label for="roast-date-unknown">不明</label>
                         </div>
                     </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>購入形式</label>
-                            <div>
-                                <input type="radio" id="purchase-form-beans" name="purchase-form" value="豆" checked>
-                                <label for="purchase-form-beans">豆</label>
-                                <input type="radio" id="purchase-form-ground" name="purchase-form" value="粉" style="margin-left: 15px;">
-                                <label for="purchase-form-ground">粉</label>
-                            </div>
-                        </div>
-                         <div class="form-group">
-                            <label for="purchase-date">購入日</label>
-                            <input type="date" id="purchase-date" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="price">価格（円）</label>
-                            <input type="number" id="price" class="form-control" placeholder="例: 1500">
-                        </div>
-                        <div class="form-group">
-                            <label for="amount">購入量（g）</label>
-                            <input type="number" id="amount" class="form-control" placeholder="例: 200">
-                        </div>
-                    </div>
-                    <button id="bean-save-btn" class="btn btn-primary" onclick="coffeeLogger.saveBeanRecord()">＋ 追加</button>
+                    <button class="btn btn-primary" onclick="addBean()">＋ 追加</button>
                 </div>
                 <div id="bean-list-container" style="margin-top: 20px;">
                 </div>
@@ -989,7 +954,6 @@
                 <h3>抽出メソッド</h3>
                 <p>よく使う抽出手順をメソッドとして登録します。</p>
                 <div class="api-settings">
-                    <input type="hidden" id="editing-method-index">
                     <div class="form-group">
                         <label for="new-method-name">メソッド名</label>
                         <input type="text" id="new-method-name" class="form-control" placeholder="例: V60 2杯用">
@@ -1008,10 +972,18 @@
                          </div>
                      </div>
                     <div class="btn-group">
-                        <button class="btn btn-primary" onclick="coffeeLogger.saveMethod()">メソッドを保存</button>
+                        <button class="btn btn-primary" onclick="saveMethod()">メソッドを保存</button>
                     </div>
                 </div>
                 <div id="method-list-container" style="margin-top: 20px;"></div>
+            </div>
+
+            <div class="card">
+                <h3>📜 よく使うレシピ</h3>
+                <div class="preset-buttons" id="preset-buttons">
+                    <!-- プリセットボタンが動的に生成される -->
+                </div>
+                <button class="btn btn-primary" onclick="saveAsPreset()">現在の設定をプリセットに保存</button>
             </div>
         </div>
     </div>
@@ -1055,49 +1027,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Bean Details Modal -->
-    <div id="bean-details-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="hideBeanDetails()">&times;</span>
-            <h3 id="modal-bean-name-title"></h3>
-            <div class="modal-grid">
-                 <fieldset>
-                    <legend>豆の情報</legend>
-                    <img id="modal-bean-image" src="" alt="コーヒー豆の画像" style="width: 100%; border-radius: 10px; margin-bottom: 15px;" onerror="this.style.display='none'">
-                    <p><strong>URL:</strong> <a id="modal-bean-url" href="#" target="_blank">リンク</a></p>
-                    <p><strong>焙煎度:</strong> <span id="modal-roast-level"></span></p>
-                    <p><strong>焙煎日:</strong> <span id="modal-roast-date"></span></p>
-                </fieldset>
-                <fieldset>
-                    <legend>購入情報</legend>
-                    <p><strong>販売店:</strong> <a id="modal-shop-url" href="#" target="_blank"><span id="modal-shop-name"></span></a></p>
-                    <p><strong>購入日:</strong> <span id="modal-purchase-date"></span></p>
-                    <p><strong>購入形式:</strong> <span id="modal-purchase-form"></span></p>
-                    <p><strong>価格:</strong> <span id="modal-price"></span>円</p>
-                    <p><strong>購入量:</strong> <span id="modal-amount"></span>g</p>
-                </fieldset>
-            </div>
-        </div>
-    </div>
-
-    <!-- Method Details Modal -->
-    <div id="method-details-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="hideMethodDetails()">&times;</span>
-            <h3 id="modal-method-name-title"></h3>
-            <fieldset>
-                <legend>抽出手順</legend>
-                <div id="modal-method-steps">
-                    <!-- Steps will be populated here -->
-                </div>
-                <p><strong>総抽出時間:</strong> <span id="modal-method-total-time"></span></p>
-            </fieldset>
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="coffeeLogger.editMethodFromModal(); hideMethodDetails();">編集</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Drip Timer Modal -->
     <div id="drip-timer-modal" class="modal">
@@ -1116,1260 +1045,1059 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        // Coffee Logger Application
         class CoffeeLogger {
             constructor() {
-                // In-memory data storage
-                this.records = [];
-                this.beans = [];
-                this.extractionMethods = [];
-                this.sortBy = 'date';
-                this.sortDirection = 'desc';
-                this.charts = {};
-                this.currentMethodIndex = null;
-                this.dripTimer = {
-                    isRunning: false,
-                    startTime: null,
-                    totalTime: 0,
-                    currentStep: 0,
-                    steps: []
-                };
-
-                this.init();
+                this.records = this.loadRecords();
+                this.presets = this.loadPresets();
+                this.beans = this.loadBeans();
+                this.methods = this.loadMethods();
+                this.sheetUrl = this.loadSheetUrl();
+                this.satisfactionChartInstance = null;
+                this.beanChartInstance = null;
+                this.tasteMapChartInstance = null;
+                this.ratings = { satisfaction: 0 };
+                this.sortConfig = { key: 'date', direction: 'desc' };
+                this.dripTimer = { interval: null, startTime: 0, elapsedTime: 0, running: false };
+                this.initializeApp();
             }
 
-            init() {
+            // --- Local Storage Handlers ---
+            loadRecords() { return JSON.parse(localStorage.getItem('coffee-records')) || []; }
+            saveRecords() { localStorage.setItem('coffee-records', JSON.stringify(this.records)); }
+            loadPresets() { return JSON.parse(localStorage.getItem('coffee-presets')) || []; }
+            savePresets() { localStorage.setItem('coffee-presets', JSON.stringify(this.presets)); }
+            loadBeans() { return JSON.parse(localStorage.getItem('coffee-beans')) || []; }
+            saveBeans() { localStorage.setItem('coffee-beans', JSON.stringify(this.beans)); }
+            loadMethods() { return JSON.parse(localStorage.getItem('coffee-methods')) || []; }
+            saveMethods() { localStorage.setItem('coffee-methods', JSON.stringify(this.methods)); }
+            loadSheetUrl() { return localStorage.getItem('google-sheet-url') || ''; }
+            saveSheetUrl(url) {
+                localStorage.setItem('google-sheet-url', url);
+                this.sheetUrl = url;
+                document.getElementById('google-sheet-url').value = url;
+                this.updateSheetStatus();
+            }
+            
+            initializeApp() {
+                this.updateTodayDate();
+                this.updateSummaryStats();
                 this.setupEventListeners();
-                this.loadData(); // データの読み込み
-                this.updateTodaySummary();
                 this.updateHistoryDisplay();
-                this.renderBeansList();
-                this.renderMethodsList();
-                this.updateDropdowns();
-                this.setCurrentDateTime();
+                this.updatePresetsDisplay();
+                this.updateBeanManagementUI();
+                this.updateBeanSelectionDropdown();
+                this.updateMethodManagementUI();
+                this.updateMethodSelectionDropdown();
+                this.updateTasteChartFilter();
+                this.generateAnalytics();
+                this.updateTasteMapChart();
+                this.updateSheetStatus();
+                this.setDefaultBrewDateTime();
+                this.addMethodStep(true); // Add initial step for method creation
+                
+                if (this.sheetUrl) document.getElementById('google-sheet-url').value = this.sheetUrl;
+            }
 
-                // Initialize charts
-                this.initCharts();
-
-                // Show first tab
-                this.showTab('record');
+            updateSheetStatus() {
+                const sheetStatus = document.getElementById('api-status-sheet');
+                const sheetText = document.getElementById('api-status-text-sheet');
+                if (this.sheetUrl) {
+                    sheetStatus.classList.add('connected');
+                    sheetText.textContent = 'URL設定済み';
+                } else {
+                    sheetStatus.classList.remove('connected');
+                    sheetText.textContent = '未設定';
+                }
             }
 
             setupEventListeners() {
-                // Rating system
-                document.querySelectorAll('.stars').forEach(starsContainer => {
-                    const stars = starsContainer.querySelectorAll('.star');
-                    stars.forEach((star, index) => {
-                        star.addEventListener('mouseover', () => {
-                            stars.forEach((s, i) => {
-                                s.classList.toggle('hover', i <= index);
-                            });
-                        });
-                        
-                        star.addEventListener('mouseout', () => {
-                            stars.forEach(s => s.classList.remove('hover'));
-                        });
-                        
-                        star.addEventListener('click', () => {
-                            const value = parseInt(star.dataset.value);
-                            const ratingType = starsContainer.dataset.rating;
-                            
-                            stars.forEach((s, i) => {
-                                s.classList.toggle('active', i < value);
-                            });
-                            
-                            starsContainer.dataset.value = value;
-                        });
-                    });
-                });
-
-                // Modal close functionality
-                window.addEventListener('click', (event) => {
-                    const modals = document.querySelectorAll('.modal');
-                    modals.forEach(modal => {
-                        if (event.target === modal) {
-                            modal.style.display = 'none';
+                // Star ratings
+                document.querySelectorAll('.stars').forEach(container => {
+                    container.addEventListener('click', e => {
+                        if (e.target.classList.contains('star')) {
+                            this.setRating(container.dataset.rating, parseInt(e.target.dataset.value));
                         }
                     });
+                    container.addEventListener('mouseover', e => {
+                         if (e.target.classList.contains('star')) {
+                            const stars = container.querySelectorAll('.star');
+                            const rating = parseInt(e.target.dataset.value);
+                            stars.forEach((star, i) => star.classList.toggle('hover', i < rating));
+                         }
+                    });
+                    container.addEventListener('mouseleave', () => {
+                        container.querySelectorAll('.star').forEach(s => s.classList.remove('hover'));
+                    });
                 });
 
-                // Roast date checkbox
-                document.getElementById('roast-date-unknown').addEventListener('change', (e) => {
-                    document.getElementById('roast-date').disabled = e.target.checked;
-                    if (e.target.checked) {
-                        document.getElementById('roast-date').value = '';
+                // Sheet URL saving
+                document.getElementById('google-sheet-url').addEventListener('change', e => this.saveSheetUrl(e.target.value));
+            
+                // Roast date unknown checkbox
+                const roastDateInput = document.getElementById('roast-date');
+                const roastDateUnknown = document.getElementById('roast-date-unknown');
+                roastDateUnknown.addEventListener('change', () => {
+                    roastDateInput.disabled = roastDateUnknown.checked;
+                    if (roastDateUnknown.checked) {
+                        roastDateInput.value = '';
                     }
                 });
-            }
 
-           initializeDefaultData() {
-                // Default beans
-                this.beans = [
-                    {
-                        name: 'エチオピア イルガチェフェ',
-                        roastLevel: 'ミディアム',
-                        roastDate: '2024-01-15',
-                        purchaseForm: '豆',
-                        purchaseDate: '2024-01-10',
-                        price: 1200,
-                        amount: 200,
-                        shopName: 'コーヒー専門店',
-                        url: '',
-                        imageUrl: '',
-                        shopUrl: ''
-                    },
-                    {
-                        name: 'グアテマラ アンティグア',
-                        roastLevel: 'シティ',
-                        roastDate: '2024-01-20',
-                        purchaseForm: '豆',
-                        purchaseDate: '2024-01-18',
-                        price: 1500,
-                        amount: 250,
-                        shopName: 'スペシャルティコーヒー店',
-                        url: '',
-                        imageUrl: '',
-                        shopUrl: ''
-                    }
-                ];
-
-                // Default extraction methods
-                this.extractionMethods = [
-                    {
-                        name: 'V60 基本レシピ',
-                        steps: [
-                            { description: '30gのお湯で30秒蒸らし', minutes: 0, seconds: 30, amount: 30 },
-                            { description: '100gまで注水', minutes: 1, seconds: 0, amount: 70 },
-                            { description: '150gまで注水', minutes: 1, seconds: 30, amount: 50 },
-                            { description: '225gまで注水', minutes: 2, seconds: 0, amount: 75 }
-                        ],
-                        totalTimeMinutes: 3,
-                        totalTimeSeconds: 0
-                    }
-                ];
-            }
-
-            // ★ initializeDefaultData のすぐ下に、この2つのメソッドを追加します ★
-            saveData() {
-                const dataToSave = {
-                    records: this.records,
-                    beans: this.beans,
-                    extractionMethods: this.extractionMethods,
-                };
-                localStorage.setItem('coffeeLoggerData', JSON.stringify(dataToSave));
-            }
-
-            loadData() {
-                const savedData = localStorage.getItem('coffeeLoggerData');
-                if (savedData) {
-                    const parsedData = JSON.parse(savedData);
-                    this.records = parsedData.records || [];
-                    this.beans = parsedData.beans || [];
-                    this.extractionMethods = parsedData.extractionMethods || [];
-                } else {
-                    // 保存されたデータがない場合のみ、サンプルデータを読み込む
-                    this.initializeDefaultData();
-                }
-            }
-
-
-            setCurrentDateTime() {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                
-                document.getElementById('brew-datetime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-                document.getElementById('today-date').textContent = `${year}年${month}月${day}日`;
-            }
-
-            updateDropdowns() {
-                // Update bean type dropdown
-                const beanSelect = document.getElementById('bean-type');
-                beanSelect.innerHTML = '<option value="">豆を選択してください</option>';
-                this.beans.forEach(bean => {
-                    const option = document.createElement('option');
-                    option.value = bean.name;
-                    option.textContent = bean.name;
-                    beanSelect.appendChild(option);
-                });
-
-                // Update extraction method dropdown
-                const methodSelect = document.getElementById('extraction-method');
-                methodSelect.innerHTML = '<option value="">メソッドを選択してください</option>';
-                this.extractionMethods.forEach(method => {
-                    const option = document.createElement('option');
-                    option.value = method.name;
-                    option.textContent = method.name;
-                    methodSelect.appendChild(option);
-                });
-
-                // Enable/disable drip timer button
-                methodSelect.addEventListener('change', () => {
-                    const dripTimerBtn = document.getElementById('drip-timer-btn');
-                    dripTimerBtn.disabled = !methodSelect.value;
+                document.getElementById('extraction-method').addEventListener('change', (e) => {
+                    document.getElementById('drip-timer-btn').disabled = !e.target.value;
                 });
             }
-
-            showTab(tabName, event) {
-                // Hide all tab contents
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                
-                // Remove active class from all tabs
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Show selected tab content
-                document.getElementById(tabName).classList.add('active');
-                
-                // Add active class to clicked tab
-                if (event) {
-                    event.target.classList.add('active');
-                }
-
-                // Update charts when switching to relevant tabs
-                if (tabName === 'analytics') {
-                    this.updateAnalyticsCharts();
-                } else if (tabName === 'taste-chart') {
-                    this.updateTasteChart();
-                }
+            
+            // --- UI Update Methods ---
+            updateTodayDate() {
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                document.getElementById('today-date').textContent = today.toLocaleDateString('ja-JP', options);
             }
 
-            saveRecord() {
-                const record = {
-                    id: Date.now(),
-                    brewDatetime: document.getElementById('brew-datetime').value,
-                    beanType: document.getElementById('bean-type').value,
-                    beanWeight: parseFloat(document.getElementById('bean-weight').value) || 0,
-                    grindSize: document.getElementById('grind-size').value,
-                    dripper: document.getElementById('dripper').value,
-                    waterWeight: parseFloat(document.getElementById('water-weight').value) || 0,
-                    waterTemperature: parseFloat(document.getElementById('water-temperature').value) || 0,
-                    extractionMethod: document.getElementById('extraction-method').value,
-                    theme: document.getElementById('theme').value,
-                    summary: document.getElementById('summary').value,
-                    impression: document.getElementById('impression').value,
-                    mouthfeel: document.getElementById('mouthfeel').value,
-                    aftertaste: document.getElementById('aftertaste').value,
-                    temperatureChange: document.getElementById('temperature-change').value,
-                    acidityBitterness: parseInt(document.getElementById('acidity-bitterness').value),
-                    richnessSoftness: parseInt(document.getElementById('richness-softness').value),
-                    satisfaction: parseInt(document.querySelector('.stars[data-rating="satisfaction"]').dataset.value) || 0
-                };
-
-                // Validation
-                if (!record.brewDatetime || !record.beanType || record.satisfaction === 0) {
-                    this.showNotification('必須項目を入力してください（抽出日時、豆の種類、満足度）', 'warning');
-                    return;
-                }
-
-                const editingId = document.getElementById('editing-record-id').value;
-                if (editingId) {
-                    // Update existing record
-                    const index = this.records.findIndex(r => r.id === parseInt(editingId));
-                    if (index !== -1) {
-                        this.records[index] = { ...record, id: parseInt(editingId) };
-                        this.showNotification('記録を更新しました！');
-                    }
-                } else {
-                    // Add new record
-                    this.records.push(record);
-                    this.showNotification('記録を保存しました！');
-                }
-
-                this.clearForm();
-                this.updateTodaySummary();
-                this.updateHistoryDisplay();
-                this.saveData();
-            }
-
-            clearForm() {
-                document.getElementById('editing-record-id').value = '';
-                document.getElementById('theme').value = '';
-                document.getElementById('summary').value = '';
-                document.getElementById('impression').value = '';
-                document.getElementById('mouthfeel').value = '';
-                document.getElementById('aftertaste').value = '';
-                document.getElementById('temperature-change').value = '';
-                document.getElementById('acidity-bitterness').value = '5';
-                document.getElementById('richness-softness').value = '5';
-                
-                // Reset star ratings
-                document.querySelectorAll('.star').forEach(star => {
-                    star.classList.remove('active');
-                });
-                document.querySelector('.stars[data-rating="satisfaction"]').dataset.value = '0';
-                
-                document.getElementById('save-btn').textContent = '💾 記録を保存';
-                this.setCurrentDateTime();
-            }
-
-            loadLastRecipe() {
-                if (this.records.length === 0) {
-                    this.showNotification('まだ記録がありません', 'warning');
-                    return;
-                }
-
-                const lastRecord = this.records[this.records.length - 1];
-                
-                // Load recipe data only (not tasting notes)
-                document.getElementById('bean-type').value = lastRecord.beanType;
-                document.getElementById('bean-weight').value = lastRecord.beanWeight;
-                document.getElementById('grind-size').value = lastRecord.grindSize;
-                document.getElementById('dripper').value = lastRecord.dripper;
-                document.getElementById('water-weight').value = lastRecord.waterWeight;
-                document.getElementById('water-temperature').value = lastRecord.waterTemperature;
-                document.getElementById('extraction-method').value = lastRecord.extractionMethod;
-                
-                // Update ratio calculation
-                if (lastRecord.beanWeight && lastRecord.waterWeight) {
-                    const ratio = lastRecord.waterWeight / lastRecord.beanWeight;
-                    document.getElementById('brew-ratio').value = ratio.toFixed(1);
-                }
-                
-                this.showNotification('前回のレシピを読み込みました');
-            }
-
-            updateTodaySummary() {
-                const today = new Date().toISOString().split('T')[0];
-                const todayRecords = this.records.filter(record => 
-                    record.brewDatetime.startsWith(today)
-                );
-
+            updateSummaryStats() {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayRecords = this.records.filter(r => r.date.startsWith(todayStr));
                 document.getElementById('today-count').textContent = todayRecords.length;
-
                 if (todayRecords.length > 0) {
-                    const avgSatisfaction = todayRecords.reduce((sum, record) => sum + record.satisfaction, 0) / todayRecords.length;
-                    document.getElementById('avg-satisfaction').textContent = avgSatisfaction.toFixed(1);
+                    const avg = todayRecords.reduce((sum, r) => sum + r.ratings.satisfaction, 0) / todayRecords.length;
+                    document.getElementById('avg-satisfaction').textContent = avg.toFixed(1);
                 } else {
                     document.getElementById('avg-satisfaction').textContent = '-';
                 }
-
-                // Calculate streak (simplified version)
                 document.getElementById('streak-days').textContent = this.calculateStreak();
             }
 
             calculateStreak() {
-                if (this.records.length === 0) return 0;
-                
-                // Simple streak calculation - consecutive days with records
-                const dates = [...new Set(this.records.map(r => r.brewDatetime.split('T')[0]))].sort().reverse();
+                const dates = [...new Set(this.records.map(r => r.date.split('T')[0]))].sort().reverse();
                 let streak = 0;
-                const today = new Date().toISOString().split('T')[0];
-                
+                const today = new Date();
                 for (let i = 0; i < dates.length; i++) {
-                    const expectedDate = new Date();
-                    expectedDate.setDate(expectedDate.getDate() - i);
-                    const expectedDateStr = expectedDate.toISOString().split('T')[0];
-                    
-                    if (dates[i] === expectedDateStr) {
+                    const recordDate = new Date(dates[i]);
+                    const expectedDate = new Date(today);
+                    expectedDate.setDate(today.getDate() - i);
+                    if (recordDate.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
                         streak++;
                     } else {
                         break;
                     }
                 }
-                
                 return streak;
             }
 
+            setRating(type, value) {
+                this.ratings[type] = value;
+                const stars = document.querySelectorAll(`[data-rating="${type}"] .star`);
+                stars.forEach((star, index) => star.classList.toggle('active', index < value));
+            }
+
+            // --- Bean Management ---
+            updateBeanManagementUI() {
+                const container = document.getElementById('bean-list-container');
+                container.innerHTML = '';
+                if (this.beans.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">まだ豆が登録されていません。</p>';
+                    return;
+                }
+                this.beans.forEach((bean, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'bean-item';
+                    const roastInfo = bean.roastDate === '不明' ? '焙煎日: 不明' : `焙煎日: ${bean.roastDate}`;
+                    item.innerHTML = `
+                        <div>
+                            <span>${bean.name}</span>
+                            <div class="bean-item-details">
+                                ${bean.roastLevel || ''} / ${roastInfo}
+                            </div>
+                        </div>
+                        <button class="btn-danger" onclick="deleteBean(${index})">削除</button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            updateBeanSelectionDropdown() {
+                const select = document.getElementById('bean-type');
+                select.innerHTML = '';
+                if (this.beans.length === 0) {
+                    select.innerHTML = '<option disabled selected>先に設定タブで豆を登録してください</option>';
+                    return;
+                }
+                this.beans.forEach(bean => {
+                    const option = document.createElement('option');
+                    option.value = bean.name;
+                    option.textContent = bean.name;
+                    select.appendChild(option);
+                });
+            }
+
+            addBean() {
+                const nameInput = document.getElementById('new-bean-name');
+                const roastLevelInput = document.getElementById('roast-level');
+                const roastDateInput = document.getElementById('roast-date');
+                const roastDateUnknown = document.getElementById('roast-date-unknown');
+                
+                const beanName = nameInput.value.trim();
+                if (!beanName) {
+                    this.showNotification('⚠️ 豆の名前を入力してください', 'warning');
+                    return;
+                }
+                if (this.beans.some(b => b.name === beanName)) {
+                    this.showNotification('⚠️ 同じ名前の豆が既に存在します', 'warning');
+                    return;
+                }
+                
+                const newBean = {
+                    name: beanName,
+                    roastLevel: roastLevelInput.value,
+                    roastDate: roastDateUnknown.checked ? '不明' : roastDateInput.value
+                };
+
+                this.beans.push(newBean);
+                this.saveBeans();
+                this.updateBeanManagementUI();
+                this.updateBeanSelectionDropdown();
+                this.updateTasteChartFilter();
+                
+                nameInput.value = '';
+                roastDateInput.value = '';
+                roastLevelInput.selectedIndex = 2; // Medium
+                roastDateUnknown.checked = false;
+                roastDateInput.disabled = false;
+                
+                this.showNotification('✅ 新しい豆を登録しました');
+            }
+
+            deleteBean(index) {
+                const beanName = this.beans[index].name;
+                if (confirm(`「${beanName}」を本当に削除しますか？`)) {
+                    this.beans.splice(index, 1);
+                    this.saveBeans();
+                    this.updateBeanManagementUI();
+                    this.updateBeanSelectionDropdown();
+                    this.updateTasteChartFilter();
+                    this.updateTasteMapChart(); // Refresh chart after deleting bean
+                    this.showNotification(`🗑️「${beanName}」を削除しました`);
+                }
+            }
+
+
+            // --- Core Logic ---
+            handleSaveClick() {
+                const editingId = document.getElementById('editing-record-id').value;
+                if (editingId) {
+                    this.updateRecord(editingId);
+                } else {
+                    this.saveRecord();
+                }
+            }
+            
+            saveRecord() {
+                const record = this.getCurrentRecipe();
+                if (!this.validateRecord(record)) return;
+
+                this.records.unshift(record);
+                this.saveRecords();
+                
+                if (this.sheetUrl) {
+                    this.sendToSpreadsheet(record);
+                }
+
+                this.updateSummaryStats();
+                this.updateHistoryDisplay();
+                this.generateAnalytics();
+                this.updateTasteMapChart();
+                this.resetForm();
+                this.showNotification('✅ 記録を保存しました！');
+            }
+            
+            updateRecord(recordId) {
+                const recordIndex = this.records.findIndex(r => r.date === recordId);
+                if (recordIndex === -1) return;
+
+                const updatedRecord = this.getCurrentRecipe(recordId); // Pass original ID
+                if (!this.validateRecord(updatedRecord)) return;
+                
+                this.records[recordIndex] = updatedRecord;
+                this.saveRecords();
+
+                if (this.sheetUrl) {
+                    // Note: This won't update the sheet, only adds a new row.
+                    // True updates would require a more complex Apps Script.
+                    this.sendToSpreadsheet(updatedRecord);
+                }
+                
+                this.updateSummaryStats();
+                this.updateHistoryDisplay();
+                this.generateAnalytics();
+                this.updateTasteMapChart();
+                this.resetForm();
+                this.showNotification('✅ 記録を更新しました！');
+            }
+
+
+            validateRecord(record) {
+                const r = record.recipe;
+                if (!r.beanType) { this.showNotification('⚠️ 豆の種類を選択してください', 'warning'); return false; }
+                if (isNaN(r.beanWeight) || r.beanWeight <= 0) { this.showNotification('⚠️ 豆の量を正しく入力してください', 'warning'); return false; }
+                if (isNaN(r.waterWeight) || r.waterWeight <= 0) { this.showNotification('⚠️ お湯の量を正しく入力してください', 'warning'); return false; }
+                if (isNaN(r.waterTemperature) || r.waterTemperature <= 0) { this.showNotification('⚠️ 湯温を正しく入力してください', 'warning'); return false; }
+                if (record.ratings.satisfaction === 0) { this.showNotification('⚠️ 総合満足度を評価してください', 'warning'); return false; }
+                return true;
+            }
+            
+            getCurrentRecipe(originalDate = null) {
+                const brewDatetime = document.getElementById('brew-datetime').value;
+                const brewDate = brewDatetime ? new Date(brewDatetime) : new Date();
+
+                return {
+                    recipe: {
+                        beanType: document.getElementById('bean-type').value,
+                        beanWeight: parseFloat(document.getElementById('bean-weight').value),
+                        grindSize: document.getElementById('grind-size').value,
+                        dripper: document.getElementById('dripper').value,
+                        waterWeight: parseFloat(document.getElementById('water-weight').value),
+                        waterTemperature: parseInt(document.getElementById('water-temperature').value, 10),
+                        extractionMethod: document.getElementById('extraction-method').value
+                    },
+                    details: {
+                        theme: document.getElementById('theme').value,
+                        summary: document.getElementById('summary').value,
+                    },
+                    tasting: {
+                        impression: document.getElementById('impression').value,
+                        mouthfeel: document.getElementById('mouthfeel').value,
+                        aftertaste: document.getElementById('aftertaste').value,
+                        temperatureChange: document.getElementById('temperature-change').value,
+                        acidityBitterness: parseInt(document.getElementById('acidity-bitterness').value, 10),
+                        richnessSoftness: parseInt(document.getElementById('richness-softness').value, 10),
+                    },
+                    ratings: { ...this.ratings },
+                    date: originalDate || brewDate.toISOString()
+                };
+            }
+
+            applyRecipe(record) {
+                if (!record.recipe) { return this.showNotification('古い形式のデータです。', 'warning'); }
+                
+                this.setDateTimeInputValue('brew-datetime', new Date(record.date));
+                
+                // Recipe
+                document.getElementById('bean-type').value = record.recipe.beanType || '';
+                document.getElementById('bean-weight').value = record.recipe.beanWeight || '';
+                document.getElementById('grind-size').value = record.recipe.grindSize || '';
+                document.getElementById('dripper').value = record.recipe.dripper || '';
+                document.getElementById('water-weight').value = record.recipe.waterWeight || '';
+                document.getElementById('water-temperature').value = record.recipe.waterTemperature || '';
+                document.getElementById('extraction-method').value = record.recipe.extractionMethod || '';
+
+                // Details & Tasting
+                 document.getElementById('theme').value = record.details.theme || '';
+                 document.getElementById('summary').value = record.details.summary || '';
+                 document.getElementById('impression').value = record.tasting.impression || '';
+                 document.getElementById('mouthfeel').value = record.tasting.mouthfeel || '';
+                 document.getElementById('aftertaste').value = record.tasting.aftertaste || '';
+                 document.getElementById('temperature-change').value = record.tasting.temperatureChange || '';
+                 document.getElementById('acidity-bitterness').value = record.tasting.acidityBitterness || 5;
+                 document.getElementById('richness-softness').value = record.tasting.richnessSoftness || 5;
+
+                this.setRating('satisfaction', record.ratings.satisfaction || 0);
+            }
+
+            resetForm() {
+                const recordTab = document.getElementById('record');
+                recordTab.querySelectorAll('input, textarea, select').forEach(el => {
+                    if(el.type === 'button' || el.type === 'submit' || el.type === 'hidden' || el.id === 'brew-datetime') return;
+                    if (el.tagName === 'SELECT') {
+                         if (el.id !== 'bean-type' && el.id !== 'extraction-method') {
+                            el.selectedIndex = (el.id === 'grind-size') ? 3 : 0;
+                        }
+                    } else if (el.type === 'range') {
+                        el.value = 5;
+                    }
+                    else {
+                        el.value = '';
+                    }
+                });
+                this.setRating('satisfaction', 0);
+                document.getElementById('editing-record-id').value = '';
+                document.getElementById('save-btn').textContent = '💾 記録を保存';
+                this.setDefaultBrewDateTime();
+            }
+            
+            setDefaultBrewDateTime() {
+                this.setDateTimeInputValue('brew-datetime', new Date());
+            }
+
+            setDateTimeInputValue(elementId, date) {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                el.value = localDate.toISOString().slice(0, 16);
+            }
+
+            
+            // --- Sheets ---
+            async sendToSpreadsheet(record) {
+                if (!this.sheetUrl) return;
+                
+                const method = this.methods.find(m => m.name === record.recipe.extractionMethod);
+                const totalTime = method ? method.totalTime : null;
+
+                const flatData = {
+                    date: new Date(record.date).toLocaleString('ja-JP'),
+                    beanType: record.recipe.beanType, beanWeight: record.recipe.beanWeight, grindSize: record.recipe.grindSize,
+                    dripper: record.recipe.dripper, waterWeight: record.recipe.waterWeight, waterTemperature: record.recipe.waterTemperature,
+                    extractionMethod: record.recipe.extractionMethod,
+                    totalTime: totalTime,
+                    theme: record.details.theme,
+                    summary: record.details.summary, impression: record.tasting.impression, mouthfeel: record.tasting.mouthfeel,
+                    aftertaste: record.tasting.aftertaste, temperatureChange: record.tasting.temperatureChange,
+                    acidityBitterness: record.tasting.acidityBitterness,
+                    richnessSoftness: record.tasting.richnessSoftness,
+                    satisfaction: record.ratings.satisfaction,
+                };
+
+                try {
+                    await fetch(this.sheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(flatData)
+                    });
+                    this.showNotification('📝 スプレッドシートに記録を送信しました');
+                } catch (error) {
+                    console.error('Spreadsheet send error:', error);
+                    this.showNotification('⚠️ スプレッドシートへの送信に失敗しました', 'warning');
+                }
+            }
+            
+            // --- Analytics & Charting ---
+            generateAnalytics() { this.updateSatisfactionChart(); this.updateBeanChart(); this.updateBestRecipe(); }
+            updateSatisfactionChart() { const ctx = document.getElementById('satisfactionChart').getContext('2d'); if (this.satisfactionChartInstance) this.satisfactionChartInstance.destroy(); const last30Days = Array.from({length: 30}).map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().split('T')[0]; }).reverse(); const satisfactionData = last30Days.map(date => { const dayRecords = this.records.filter(r => r.date.startsWith(date)); if (dayRecords.length === 0) return null; return dayRecords.reduce((sum, r) => sum + r.ratings.satisfaction, 0) / dayRecords.length; }); this.satisfactionChartInstance = new Chart(ctx, { type: 'line', data: { labels: last30Days.map(date => new Date(date).toLocaleDateString('ja-JP', {month: 'short', day: 'numeric'})), datasets: [{ label: '満足度', data: satisfactionData, borderColor: '#8B4513', backgroundColor: 'rgba(139, 69, 19, 0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10, ticks: { stepSize: 1 }}}, plugins: { legend: { display: false }}} }); }
+            updateBeanChart() { const ctx = document.getElementById('beanChart').getContext('2d'); if (this.beanChartInstance) this.beanChartInstance.destroy(); const beanStats = this.records.reduce((acc, record) => { if (!record.recipe || !record.recipe.beanType) return acc; const beanType = record.recipe.beanType; if (!acc[beanType]) acc[beanType] = { count: 0, total: 0 }; acc[beanType].count++; acc[beanType].total += record.ratings.satisfaction; return acc; }, {}); const labels = Object.keys(beanStats); const avgRatings = labels.map(bean => beanStats[bean].total / beanStats[bean].count); this.beanChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: '平均満足度', data: avgRatings, backgroundColor: ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#D2B48C', '#BC8F8F', '#A0522D'] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 }}, plugins: { legend: { display: false }}} }); }
+            updateBestRecipe() { const container = document.getElementById('best-recipe'); const bestRecipe = [...this.records].filter(r => r.ratings && r.ratings.satisfaction >= 8).sort((a, b) => b.ratings.satisfaction - a.ratings.satisfaction)[0]; if (!bestRecipe || !bestRecipe.recipe) { container.innerHTML = '<p>満足度8以上の記録なし</p>'; return; } container.innerHTML = `<div style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 20px; border-radius: 10px; color: white;"><h4>🏆 ${bestRecipe.recipe.beanType}</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;"><div><strong>豆量:</strong> ${bestRecipe.recipe.beanWeight}g</div><div><strong>湯量:</strong> ${bestRecipe.recipe.waterWeight}g</div><div><strong>温度:</strong> ${bestRecipe.recipe.waterTemperature}°C</div><div><strong>メソッド:</strong> ${bestRecipe.recipe.extractionMethod}</div></div><div style="margin-top: 15px;"><strong>満足度:</strong> ${'★'.repeat(bestRecipe.ratings.satisfaction)}${'☆'.repeat(10 - bestRecipe.ratings.satisfaction)}</div><button onclick="applyRecipeById('${bestRecipe.date}')" style="margin-top: 15px; padding: 8px 16px; border: none; border-radius: 5px; background: rgba(255,255,255,0.3); color: white; cursor: pointer;">このレシピを適用</button></div>`; }
+            
+            updateTasteChartFilter() {
+                const container = document.getElementById('taste-chart-filter-container');
+                container.innerHTML = '';
+                if (this.beans.length === 0) {
+                    container.innerHTML = '<p>先に設定タブで豆を登録してください。</p>';
+                    return;
+                }
+                this.beans.forEach(bean => {
+                    const item = document.createElement('div');
+                    item.className = 'filter-item';
+                    item.innerHTML = `
+                        <input type="checkbox" id="filter-${bean.name}" value="${bean.name}" checked onchange="coffeeLogger.updateTasteMapChart()">
+                        <label for="filter-${bean.name}">${bean.name}</label>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+            
+            updateTasteMapChart() {
+                const ctx = document.getElementById('tasteMapChart').getContext('2d');
+                if (this.tasteMapChartInstance) {
+                    this.tasteMapChartInstance.destroy();
+                }
+
+                const selectedBeans = Array.from(document.querySelectorAll('#taste-chart-filter-container input:checked')).map(cb => cb.value);
+
+                const datasets = this.beans
+                    .filter(bean => selectedBeans.includes(bean.name))
+                    .map((bean, index) => {
+                        const beanRecords = this.records.filter(r => r.recipe.beanType === bean.name && r.tasting.acidityBitterness && r.tasting.richnessSoftness);
+                        const colorPalette = ['#8B4513', '#D2691E', '#CD853F', '#A0522D', '#DEB887', '#BC8F8F', '#F4A460', '#D2B48C'];
+                        
+                        return {
+                            label: bean.name,
+                            data: beanRecords.map(r => ({
+                                x: r.tasting.acidityBitterness,
+                                y: r.tasting.richnessSoftness,
+                                record: r
+                            })),
+                            backgroundColor: colorPalette[index % colorPalette.length],
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        };
+                    });
+                
+                const crosshairPlugin = {
+                    id: 'crosshair',
+                    afterDraw: (chart) => {
+                        const { ctx, chartArea: { left, top, right, bottom }, scales: { x, y } } = chart;
+                        ctx.save();
+                        
+                        const centerX = x.getPixelForValue(5.5);
+                        const centerY = y.getPixelForValue(5.5);
+                        
+                        ctx.strokeStyle = '#cccccc';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, top);
+                        ctx.lineTo(centerX, bottom);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(left, centerY);
+                        ctx.lineTo(right, centerY);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#aaaaaa';
+                        ctx.font = '12px Segoe UI';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        ctx.fillText('ソフトな酸味', (left + centerX) / 2, (top + centerY) / 2);
+                        ctx.fillText('ソフトな苦味', (right + centerX) / 2, (top + centerY) / 2);
+                        ctx.fillText('コクのある酸味', (left + centerX) / 2, (bottom + centerY) / 2);
+                        ctx.fillText('コクのある苦味', (right + centerX) / 2, (bottom + centerY) / 2);
+
+                        ctx.restore();
+                    }
+                };
+
+                this.tasteMapChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets },
+                    plugins: [crosshairPlugin],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const element = elements[0];
+                                const { record } = this.tasteMapChartInstance.data.datasets[element.datasetIndex].data[element.index];
+                                this.displayTasteChartDetails(record);
+                            }
+                        },
+                        scales: {
+                            x: {
+                                min: 0.5,
+                                max: 10.5,
+                                title: { display: true, text: '酸味  ←  バランス  →  苦味' },
+                                grid: { display: false },
+                                ticks: { display: false }
+                            },
+                            y: {
+                                min: 0.5,
+                                max: 10.5,
+                                title: { display: true, text: 'コク  ←  ボディ  →  ソフト' },
+                                grid: { display: false },
+                                ticks: { display: false },
+                                reverse: true
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const record = context.raw.record;
+                                        return `${record.recipe.beanType} (${new Date(record.date).toLocaleDateString()})`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            displayTasteChartDetails(record) {
+                const container = document.getElementById('taste-chart-details');
+                const date = new Date(record.date);
+                container.innerHTML = `
+                    <h4>レシピ詳細</h4>
+                    <p><strong>日付:</strong> ${date.toLocaleString('ja-JP')}</p>
+                    <p><strong>豆:</strong> ${record.recipe.beanType}</p>
+                    <p><strong>満足度:</strong> ${'★'.repeat(record.ratings.satisfaction)}${'☆'.repeat(10 - record.ratings.satisfaction)}</p>
+                    <hr style="margin: 10px 0;">
+                    <p><strong>豆量:</strong> ${record.recipe.beanWeight}g</p>
+                    <p><strong>湯量:</strong> ${record.recipe.waterWeight}g</p>
+                    <p><strong>湯温:</strong> ${record.recipe.waterTemperature}°C</p>
+                    <p><strong>メソッド:</strong> ${record.recipe.extractionMethod}</p>
+                    ${record.details.summary ? `<p style="margin-top:10px"><strong>メモ:</strong> ${record.details.summary}</p>` : ''}
+                `;
+            }
+
+            // --- History Tab ---
             updateHistoryDisplay() {
                 const container = document.getElementById('records-list');
-                
+                const sortKey = document.getElementById('sort-by').value;
+                this.sortConfig.key = sortKey;
+
                 if (this.records.length === 0) {
                     container.innerHTML = '<p>まだ記録がありません。最初の一杯を記録してみましょう！</p>';
                     return;
                 }
 
-                // Sort records
                 const sortedRecords = [...this.records].sort((a, b) => {
-                    let valueA, valueB;
-                    
-                    switch (this.sortBy) {
+                    let valA, valB;
+                    switch (this.sortConfig.key) {
                         case 'satisfaction':
-                            valueA = a.satisfaction;
-                            valueB = b.satisfaction;
+                            valA = a.ratings.satisfaction;
+                            valB = b.ratings.satisfaction;
                             break;
                         case 'beanType':
-                            valueA = a.beanType;
-                            valueB = b.beanType;
+                            valA = a.recipe.beanType;
+                            valB = b.recipe.beanType;
                             break;
                         case 'daysSinceRoast':
-                            valueA = this.calculateDaysSinceRoast(a);
-                            valueB = this.calculateDaysSinceRoast(b);
+                            valA = this._getDaysSinceRoast(a.date, a.recipe.beanType) ?? -1;
+                            valB = this._getDaysSinceRoast(b.date, b.recipe.beanType) ?? -1;
                             break;
-                        default: // date
-                            valueA = new Date(a.brewDatetime);
-                            valueB = new Date(b.brewDatetime);
+                        case 'date':
+                        default:
+                            valA = new Date(a.date);
+                            valB = new Date(b.date);
+                            break;
                     }
-                    
-                    if (this.sortDirection === 'desc') {
-                        return valueB > valueA ? 1 : valueB < valueA ? -1 : 0;
-                    } else {
-                        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
-                    }
+
+                    if (valA < valB) return this.sortConfig.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return this.sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
                 });
 
-                container.innerHTML = sortedRecords.map(record => `
-                    <div class="record-item">
-                        <div class="record-item-main">
-                            <div class="record-header">
-                                <span class="record-date">${this.formatDateTime(record.brewDatetime)}</span>
-                                <span class="record-rating">${'★'.repeat(record.satisfaction)}</span>
+                container.innerHTML = sortedRecords.map(record => {
+                    if (!record.recipe) return '';
+                    const date = new Date(record.date);
+                    const satisfaction = '★'.repeat(record.ratings.satisfaction) + '☆'.repeat(10 - record.ratings.satisfaction);
+                    const daysSinceRoast = this._getDaysSinceRoast(record.date, record.recipe.beanType);
+                    
+                    return `
+                        <div class="record-item">
+                            <div class="record-item-main">
+                                <div class="record-header">
+                                    <span class="record-date">${date.toLocaleString('ja-JP')}</span>
+                                    <span class="record-rating">${satisfaction}</span>
+                                </div>
+                                <div class="record-details">
+                                    <p><strong>豆:</strong> ${record.recipe.beanType}</p>
+                                    <p><strong>レシピ:</strong> ${record.recipe.beanWeight}g / ${record.recipe.waterWeight}g / ${record.recipe.waterTemperature}°C</p>
+                                </div>
+                                <div class="record-details">
+                                <p><strong>焙煎後:</strong> ${daysSinceRoast !== null ? `${daysSinceRoast}日` : '不明'}</p>
+                                <p><strong>メソッド:</strong> ${record.recipe.extractionMethod}</p>
+                                </div>
                             </div>
-                            <div class="record-details">
-                                <strong>豆:</strong> ${record.beanType}<br>
-                                <strong>豆量:</strong> ${record.beanWeight}g
-                                <strong>挽き目:</strong> ${record.grindSize}<br>
-                                <strong>湯量:</strong> ${record.waterWeight}g
-                                <strong>湯温:</strong> ${record.waterTemperature}°C
+                            <div class="record-item-actions">
+                                <button class="btn btn-secondary" onclick="showRecordDetails('${record.date}')">詳細</button>
+                                <button class="btn btn-secondary" onclick="editRecord('${record.date}')">編集</button>
                             </div>
-                            <div class="record-details">
-                                <strong>テーマ:</strong> ${record.theme || '-'}<br>
-                                <strong>印象:</strong> ${record.impression || '-'}<br>
-                                <strong>満足度:</strong> ${record.satisfaction}/10
-                            </div>
-                        </div>
-                        <div class="record-item-actions">
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.viewRecordDetails(${record.id})">詳細</button>
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.editRecord(${record.id})">編集</button>
-                            <button class="btn btn-danger btn-small" onclick="coffeeLogger.deleteRecord(${record.id})">削除</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            calculateDaysSinceRoast(record) {
-                const bean = this.beans.find(b => b.name === record.beanType);
-                if (!bean || !bean.roastDate) return 999;
-                
-                const roastDate = new Date(bean.roastDate);
-                const brewDate = new Date(record.brewDatetime);
-                const diffTime = Math.abs(brewDate - roastDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                return diffDays;
+                        </div>`;
+                }).join('');
             }
 
             toggleSortDirection() {
-                this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
-                document.getElementById('sort-direction-btn').textContent = this.sortDirection === 'desc' ? '降順' : '昇順';
+                this.sortConfig.direction = this.sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                document.getElementById('sort-direction-btn').textContent = this.sortConfig.direction === 'asc' ? '昇順' : '降順';
                 this.updateHistoryDisplay();
             }
 
-            formatDateTime(datetime) {
-                const date = new Date(datetime);
-                return date.toLocaleString('ja-JP');
+            _getDaysSinceRoast(recordDate, beanName) {
+                const bean = this.beans.find(b => b.name === beanName);
+                if (!bean || !bean.roastDate || bean.roastDate === '不明') {
+                    return null;
+                }
+                const roastDate = new Date(bean.roastDate);
+                const brewDate = new Date(recordDate);
+                const diffTime = Math.abs(brewDate - roastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
             }
-
-            viewRecordDetails(recordId) {
-                const record = this.records.find(r => r.id === recordId);
+            
+            showRecordDetails(recordDate) {
+                const record = this.records.find(r => r.date === recordDate);
                 if (!record) return;
+                
+                const method = this.methods.find(m => m.name === record.recipe.extractionMethod);
+                const totalTime = method ? method.totalTime : null;
 
                 // Populate modal with record data
-                document.getElementById('modal-brew-datetime').textContent = this.formatDateTime(record.brewDatetime);
-                document.getElementById('modal-bean-type').textContent = record.beanType;
-                document.getElementById('modal-bean-weight').textContent = record.beanWeight;
-                document.getElementById('modal-grind-size').textContent = record.grindSize;
-                document.getElementById('modal-dripper').textContent = record.dripper;
-                document.getElementById('modal-water-weight').textContent = record.waterWeight;
-                document.getElementById('modal-water-temperature').textContent = record.waterTemperature;
-                document.getElementById('modal-extraction-method').textContent = record.extractionMethod || '-';
-                document.getElementById('modal-total-time').textContent = '-'; // TODO: implement total time tracking
-                document.getElementById('modal-impression').textContent = record.impression || '-';
-                document.getElementById('modal-mouthfeel').textContent = record.mouthfeel || '-';
-                document.getElementById('modal-aftertaste').textContent = record.aftertaste || '-';
-                document.getElementById('modal-temperature-change').textContent = record.temperatureChange || '-';
-                document.getElementById('modal-acidity-bitterness').textContent = record.acidityBitterness;
-                document.getElementById('modal-richness-softness').textContent = record.richnessSoftness;
-                document.getElementById('modal-theme').textContent = record.theme || '-';
-                document.getElementById('modal-summary').textContent = record.summary || '-';
-                document.getElementById('modal-satisfaction').textContent = record.satisfaction;
+                document.getElementById('modal-brew-datetime').textContent = new Date(record.date).toLocaleString('ja-JP');
+                document.getElementById('modal-bean-type').textContent = record.recipe.beanType;
+                document.getElementById('modal-bean-weight').textContent = record.recipe.beanWeight;
+                document.getElementById('modal-grind-size').textContent = record.recipe.grindSize;
+                document.getElementById('modal-dripper').textContent = record.recipe.dripper;
+                document.getElementById('modal-water-weight').textContent = record.recipe.waterWeight;
+                document.getElementById('modal-water-temperature').textContent = record.recipe.waterTemperature;
+                document.getElementById('modal-extraction-method').textContent = record.recipe.extractionMethod;
+                document.getElementById('modal-total-time').textContent = totalTime ? `${Math.floor(totalTime / 60)}分${totalTime % 60}秒` : 'N/A';
+                
+                document.getElementById('modal-impression').textContent = record.tasting.impression;
+                document.getElementById('modal-mouthfeel').textContent = record.tasting.mouthfeel;
+                document.getElementById('modal-aftertaste').textContent = record.tasting.aftertaste;
+                document.getElementById('modal-temperature-change').textContent = record.tasting.temperatureChange;
+                document.getElementById('modal-acidity-bitterness').textContent = record.tasting.acidityBitterness;
+                document.getElementById('modal-richness-softness').textContent = record.tasting.richnessSoftness;
+                
+                document.getElementById('modal-theme').textContent = record.details.theme;
+                document.getElementById('modal-summary').textContent = record.details.summary;
+                document.getElementById('modal-satisfaction').textContent = record.ratings.satisfaction;
 
-                // Add action buttons
-                document.getElementById('modal-btn-group').innerHTML = `
-                    <button class="btn btn-secondary" onclick="coffeeLogger.editRecord(${recordId}); coffeeLogger.hideRecordDetails();">編集</button>
-                    <button class="btn btn-danger" onclick="coffeeLogger.deleteRecord(${recordId}); coffeeLogger.hideRecordDetails();">削除</button>
+                // Set up buttons in modal
+                const modalBtnGroup = document.getElementById('modal-btn-group');
+                modalBtnGroup.innerHTML = `
+                    <button class="btn btn-secondary" onclick="editRecord('${record.date}')">この記録を編集</button>
+                    <button id="copy-text-btn" class="btn btn-primary">テキストをコピー</button>
                 `;
 
+                const copyBtn = document.getElementById('copy-text-btn');
+                copyBtn.onclick = () => {
+                    const textToCopy = this._createRecordTextForCopy(record);
+                    const textarea = document.createElement('textarea');
+                    textarea.value = textToCopy;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.showNotification('✅ レシピをコピーしました');
+                };
+
+                // Show modal
                 document.getElementById('record-details-modal').style.display = 'block';
             }
 
-            hideRecordDetails() {
-                document.getElementById('record-details-modal').style.display = 'none';
-            }
+            _createRecordTextForCopy(record) {
+                const r = record.recipe;
+                const t = record.tasting;
+                const d = record.details;
+                const method = this.methods.find(m => m.name === r.extractionMethod);
+                const totalTime = method ? method.totalTime : null;
 
-            editRecord(recordId) {
-                const record = this.records.find(r => r.id === recordId);
+                let methodText = `抽出メソッド: ${r.extractionMethod}\n`;
+                if(method) {
+                     methodText += method.steps.map((step, i) => {
+                        let stepStr = `${i+1}. ${step.action}`;
+                        if(step.action !== '蒸らし') {
+                             stepStr += ` @ ${step.minutes}:${String(step.seconds).padStart(2, '0')}`;
+                        }
+                        stepStr += ` / ${step.waterAmount}g`;
+                        return stepStr;
+                    }).join('\n');
+                }
+
+                return `
+## 抽出レシピ
+- 抽出日時: ${new Date(record.date).toLocaleString('ja-JP')}
+- 豆の種類: ${r.beanType}
+- 豆の量: ${r.beanWeight}g
+- 挽き目: ${r.grindSize}
+- ドリッパー: ${r.dripper}
+- お湯の量: ${r.waterWeight}g
+- 湯温: ${r.waterTemperature}℃
+- 総抽出時間: ${totalTime ? `${Math.floor(totalTime / 60)}分${totalTime % 60}秒` : 'N/A'}
+
+## ${methodText}
+
+## テイスティングノート
+- 第一印象: ${t.impression}
+- 口当たり: ${t.mouthfeel}
+- 後味: ${t.aftertaste}
+- 温度変化: ${t.temperatureChange}
+- 味のバランス: 酸味 ${t.acidityBitterness}/10 苦味
+- ボディ: コク ${t.richnessSoftness}/10 ソフト
+
+## 詳細・評価
+- 今日のテーマ: ${d.theme}
+- サマリー: ${d.summary}
+- 総合満足度: ${record.ratings.satisfaction}/10
+                `.trim().replace(/^    /gm, '');
+            }
+            
+            editRecord(recordDate) {
+                const record = this.records.find(r => r.date === recordDate);
                 if (!record) return;
 
-                // Populate form with record data
-                document.getElementById('editing-record-id').value = recordId;
-                document.getElementById('brew-datetime').value = record.brewDatetime;
-                document.getElementById('bean-type').value = record.beanType;
-                document.getElementById('bean-weight').value = record.beanWeight;
-                document.getElementById('grind-size').value = record.grindSize;
-                document.getElementById('dripper').value = record.dripper;
-                document.getElementById('water-weight').value = record.waterWeight;
-                document.getElementById('water-temperature').value = record.waterTemperature;
-                document.getElementById('extraction-method').value = record.extractionMethod;
-                document.getElementById('theme').value = record.theme;
-                document.getElementById('summary').value = record.summary;
-                document.getElementById('impression').value = record.impression;
-                document.getElementById('mouthfeel').value = record.mouthfeel;
-                document.getElementById('aftertaste').value = record.aftertaste;
-                document.getElementById('temperature-change').value = record.temperatureChange;
-                document.getElementById('acidity-bitterness').value = record.acidityBitterness;
-                document.getElementById('richness-softness').value = record.richnessSoftness;
+                this.applyRecipe(record);
 
-                // Update ratio calculation
-                if (record.beanWeight && record.waterWeight) {
-                    const ratio = record.waterWeight / record.beanWeight;
-                    document.getElementById('brew-ratio').value = ratio.toFixed(1);
-                }
+                document.getElementById('editing-record-id').value = record.date;
+                document.getElementById('save-btn').textContent = '💾 記録を更新';
 
-                // Set star rating
-                const starsContainer = document.querySelector('.stars[data-rating="satisfaction"]');
-                const stars = starsContainer.querySelectorAll('.star');
-                stars.forEach((star, index) => {
-                    star.classList.toggle('active', index < record.satisfaction);
-                });
-                starsContainer.dataset.value = record.satisfaction;
-
-                document.getElementById('save-btn').textContent = '📝 記録を更新';
-                
-                // Switch to record tab
-                this.showTab('record');
-                document.querySelector('.nav-tab').click();
+                hideRecordDetails();
+                showTab('record', { currentTarget: document.querySelector('.nav-tab[onclick*="record"]') });
             }
-
-            deleteRecord(recordId) {
-                if (confirm('この記録を削除しますか？')) {
-                    this.records = this.records.filter(r => r.id !== recordId);
-                    this.updateTodaySummary();
-                    this.updateHistoryDisplay();
-                    this.showNotification('記録を削除しました');
-                    this.saveData();
-                }
-            }
-
-            // Bean management
-            saveBeanRecord() {
-                const bean = {
-                    name: document.getElementById('new-bean-name').value,
-                    url: document.getElementById('bean-url').value,
-                    imageUrl: document.getElementById('bean-image-url').value,
-                    shopName: document.getElementById('shop-name').value,
-                    shopUrl: document.getElementById('shop-url').value,
-                    roastLevel: document.getElementById('roast-level').value,
-                    roastDate: document.getElementById('roast-date-unknown').checked ? null : document.getElementById('roast-date').value,
-                    purchaseForm: document.querySelector('input[name="purchase-form"]:checked').value,
-                    purchaseDate: document.getElementById('purchase-date').value,
-                    price: parseFloat(document.getElementById('price').value) || 0,
-                    amount: parseFloat(document.getElementById('amount').value) || 0
-                };
-
-                if (!bean.name) {
-                    this.showNotification('豆の名前を入力してください', 'warning');
+        
+            // --- Method Management & Timer ---
+            updateMethodManagementUI() {
+                const container = document.getElementById('method-list-container');
+                container.innerHTML = '';
+                if (this.methods.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">登録されたメソッドはありません。</p>';
                     return;
                 }
-
-                const editingIndex = document.getElementById('editing-bean-index').value;
-                if (editingIndex !== '') {
-                    // Update existing bean
-                    this.beans[parseInt(editingIndex)] = bean;
-                    this.showNotification('豆の情報を更新しました！');
-                } else {
-                    // Add new bean
-                    this.beans.push(bean);
-                    this.showNotification('豆を追加しました！');
-                }
-
-                this.clearBeanForm();
-                this.renderBeansList();
-                this.updateDropdowns();
-                this.saveData();
-            }
-
-            clearBeanForm() {
-                document.getElementById('editing-bean-index').value = '';
-                document.getElementById('new-bean-name').value = '';
-                document.getElementById('bean-url').value = '';
-                document.getElementById('bean-image-url').value = '';
-                document.getElementById('shop-name').value = '';
-                document.getElementById('shop-url').value = '';
-                document.getElementById('roast-level').value = 'ライト';
-                document.getElementById('roast-date').value = '';
-                document.getElementById('roast-date-unknown').checked = false;
-                document.getElementById('roast-date').disabled = false;
-                document.getElementById('purchase-form-beans').checked = true;
-                document.getElementById('purchase-date').value = '';
-                document.getElementById('price').value = '';
-                document.getElementById('amount').value = '';
-                document.getElementById('bean-save-btn').textContent = '＋ 追加';
-            }
-
-            renderBeansList() {
-                const container = document.getElementById('bean-list-container');
-                
-                if (this.beans.length === 0) {
-                    container.innerHTML = '<p>まだ豆が登録されていません。</p>';
-                    return;
-                }
-
-                container.innerHTML = this.beans.map((bean, index) => `
-                    <div class="bean-item">
+                this.methods.forEach((method, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'method-item';
+                    const totalTime = method.totalTime;
+                    item.innerHTML = `
                         <div>
-                            <strong>${bean.name}</strong>
-                            <div class="bean-item-details">
-                                ${bean.roastLevel} | ${bean.roastDate || '焙煎日不明'} | ${bean.purchaseForm} | ${bean.amount}g
-                                ${bean.shopName ? ` | ${bean.shopName}` : ''}
+                            <span>${method.name}</span>
+                            <div class="method-item-details">
+                                ${method.steps.length}手順 / ${Math.floor(totalTime / 60)}分${totalTime % 60}秒
                             </div>
                         </div>
-                        <div class="bean-item-actions">
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.viewBeanDetails(${index})">詳細</button>
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.editBean(${index})">編集</button>
-                            <button class="btn btn-danger btn-small" onclick="coffeeLogger.deleteBean(${index})">削除</button>
-                        </div>
-                    </div>
-                `).join('');
+                        <button class="btn-danger" onclick="deleteMethod(${index})">削除</button>
+                    `;
+                    container.appendChild(item);
+                });
             }
 
-            viewBeanDetails(index) {
-                const bean = this.beans[index];
-                if (!bean) return;
-
-                // Populate modal with bean data
-                document.getElementById('modal-bean-name-title').textContent = bean.name;
-                document.getElementById('modal-bean-image').src = bean.imageUrl || '';
-                document.getElementById('modal-bean-image').style.display = bean.imageUrl ? 'block' : 'none';
-                document.getElementById('modal-bean-url').href = bean.url || '#';
-                document.getElementById('modal-bean-url').textContent = bean.url ? 'リンク' : 'URLなし';
-                document.getElementById('modal-roast-level').textContent = bean.roastLevel;
-                document.getElementById('modal-roast-date').textContent = bean.roastDate || '不明';
-                document.getElementById('modal-shop-name').textContent = bean.shopName || '不明';
-                document.getElementById('modal-shop-url').href = bean.shopUrl || '#';
-                document.getElementById('modal-purchase-date').textContent = bean.purchaseDate || '不明';
-                document.getElementById('modal-purchase-form').textContent = bean.purchaseForm;
-                document.getElementById('modal-price').textContent = bean.price || '不明';
-                document.getElementById('modal-amount').textContent = bean.amount || '不明';
-
-                document.getElementById('bean-details-modal').style.display = 'block';
-            }
-
-            hideBeanDetails() {
-                document.getElementById('bean-details-modal').style.display = 'none';
-            }
-
-            editBean(index) {
-                const bean = this.beans[index];
-                if (!bean) return;
-
-                // Populate form with bean data
-                document.getElementById('editing-bean-index').value = index;
-                document.getElementById('new-bean-name').value = bean.name;
-                document.getElementById('bean-url').value = bean.url || '';
-                document.getElementById('bean-image-url').value = bean.imageUrl || '';
-                document.getElementById('shop-name').value = bean.shopName || '';
-                document.getElementById('shop-url').value = bean.shopUrl || '';
-                document.getElementById('roast-level').value = bean.roastLevel;
-                
-                if (bean.roastDate) {
-                    document.getElementById('roast-date').value = bean.roastDate;
-                    document.getElementById('roast-date-unknown').checked = false;
-                    document.getElementById('roast-date').disabled = false;
-                } else {
-                    document.getElementById('roast-date').value = '';
-                    document.getElementById('roast-date-unknown').checked = true;
-                    document.getElementById('roast-date').disabled = true;
+            updateMethodSelectionDropdown() {
+                const select = document.getElementById('extraction-method');
+                select.innerHTML = '';
+                if (this.methods.length === 0) {
+                    select.innerHTML = '<option value="" disabled selected>先にメソッドを登録してください</option>';
+                    document.getElementById('drip-timer-btn').disabled = true;
+                    return;
                 }
-                
-                document.querySelector(`input[name="purchase-form"][value="${bean.purchaseForm}"]`).checked = true;
-                document.getElementById('purchase-date').value = bean.purchaseDate || '';
-                document.getElementById('price').value = bean.price || '';
-                document.getElementById('amount').value = bean.amount || '';
-                document.getElementById('bean-save-btn').textContent = '📝 更新';
+                select.innerHTML = '<option value="">メソッドを選択...</option>';
+                this.methods.forEach(method => {
+                    const option = document.createElement('option');
+                    option.value = method.name;
+                    option.textContent = method.name;
+                    select.appendChild(option);
+                });
             }
 
-            deleteBean(index) {
-                if (confirm('この豆を削除しますか？')) {
-                    this.beans.splice(index, 1);
-                    this.renderBeansList();
-                    this.updateDropdowns();
-                    this.showNotification('豆を削除しました');
-                    this.saveData();
-                }
-            }
-
-            // Method management
-            addMethodStep() {
+            addMethodStep(isInitial = false) {
                 const container = document.getElementById('method-steps-container');
-                const stepIndex = container.children.length;
-                
-                const stepHtml = `
-                    <div class="method-step" data-step="${stepIndex}">
-                        <input type="text" class="form-control" placeholder="手順の説明" data-field="description">
-                        <div class="time-input-group">
-                            <input type="number" class="form-control" placeholder="分" min="0" data-field="minutes" style="width: 60px;">
-                            <span>:</span>
-                            <input type="number" class="form-control" placeholder="秒" min="0" max="59" data-field="seconds" style="width: 60px;">
+                const stepCount = container.children.length;
+                const stepElement = document.createElement('div');
+                stepElement.className = 'method-step';
+
+                if (stepCount === 0) { // First step is always "蒸らし"
+                    stepElement.innerHTML = `
+                        <select class="form-control" disabled><option>蒸らす</option></select>
+                        <div class="time-input-group" style="visibility: hidden;">
+                            <input type="number" class="form-control" value="0" disabled><span>:</span><input type="number" class="form-control" value="0" disabled>
                         </div>
-                        <input type="number" class="form-control" placeholder="注水量(g)" data-field="amount" style="width: 100px;">
-                        <button type="button" class="btn btn-danger btn-small" onclick="this.parentElement.remove()">削除</button>
-                    </div>
-                `;
-                
-                container.insertAdjacentHTML('beforeend', stepHtml);
+                        <input type="number" class="form-control" placeholder="お湯の量(g)">
+                        <span></span>
+                    `;
+                } else {
+                    stepElement.innerHTML = `
+                        <select class="form-control">
+                            <option value="お湯を注ぐ">お湯を注ぐ</option>
+                            <option value="円を描くように注ぐ">円を描くように注ぐ</option>
+                            <option value="待つ">待つ</option>
+                            <option value="カップを揺らす">カップを揺らす</option>
+                        </select>
+                        <div class="time-input-group">
+                            <input type="number" class="form-control" placeholder="分" min="0">
+                            <span>:</span>
+                            <input type="number" class="form-control" placeholder="秒" min="0" max="59">
+                        </div>
+                        <input type="number" class="form-control" placeholder="累計湯量(g)">
+                        <button class="btn-danger btn-small" onclick="removeMethodStep(this)">×</button>
+                    `;
+                }
+                container.appendChild(stepElement);
+            }
+            
+            removeMethodStep(button) {
+                button.parentElement.remove();
             }
 
             saveMethod() {
-                const name = document.getElementById('new-method-name').value;
-                const totalMinutes = parseInt(document.getElementById('method-total-time-min').value) || 0;
-                const totalSeconds = parseInt(document.getElementById('method-total-time-sec').value) || 0;
+                const name = document.getElementById('new-method-name').value.trim();
+                if (!name) { this.showNotification('⚠️ メソッド名を入力してください', 'warning'); return; }
+                if (this.methods.some(m => m.name === name)) { this.showNotification('⚠️ 同じ名前のメソッドが既に存在します', 'warning'); return; }
                 
-                if (!name) {
-                    this.showNotification('メソッド名を入力してください', 'warning');
-                    return;
-                }
-
                 const steps = [];
-                document.querySelectorAll('.method-step').forEach(stepEl => {
-                    const step = {
-                        description: stepEl.querySelector('[data-field="description"]').value,
-                        minutes: parseInt(stepEl.querySelector('[data-field="minutes"]').value) || 0,
-                        seconds: parseInt(stepEl.querySelector('[data-field="seconds"]').value) || 0,
-                        amount: parseFloat(stepEl.querySelector('[data-field="amount"]').value) || 0
-                    };
-                    if (step.description) {
-                        steps.push(step);
+                document.querySelectorAll('#method-steps-container .method-step').forEach((stepEl, index) => {
+                    const inputs = stepEl.querySelectorAll('input');
+                    if (index === 0) {
+                        steps.push({
+                            action: stepEl.querySelector('select').value,
+                            minutes: 0,
+                            seconds: 0,
+                            waterAmount: parseFloat(inputs[2].value) || null
+                        });
+                    } else {
+                        steps.push({
+                            action: stepEl.querySelector('select').value,
+                            minutes: parseInt(inputs[0].value) || 0,
+                            seconds: parseInt(inputs[1].value) || 0,
+                            waterAmount: parseFloat(inputs[2].value) || null
+                        });
                     }
                 });
 
-                if (steps.length === 0) {
-                    this.showNotification('手順を追加してください', 'warning');
-                    return;
-                }
+                if (steps.length === 0) { this.showNotification('⚠️ 少なくとも1つの手順を追加してください', 'warning'); return; }
+                const totalTimeMin = parseInt(document.getElementById('method-total-time-min').value) || 0;
+                const totalTimeSec = parseInt(document.getElementById('method-total-time-sec').value) || 0;
 
-                const method = {
-                    name,
-                    steps,
-                    totalTimeMinutes: totalMinutes,
-                    totalTimeSeconds: totalSeconds
-                };
 
-                const editingIndex = document.getElementById('editing-method-index').value;
-                if (editingIndex !== '') {
-                    // Update existing method
-                    this.extractionMethods[parseInt(editingIndex)] = method;
-                    this.showNotification('メソッドを更新しました！');
-                } else {
-                    // Add new method
-                    this.extractionMethods.push(method);
-                    this.showNotification('メソッドを保存しました！');
-                }
+                this.methods.push({ name, steps, totalTime: (totalTimeMin * 60) + totalTimeSec });
+                this.saveMethods();
+                this.updateMethodManagementUI();
+                this.updateMethodSelectionDropdown();
 
-                this.clearMethodForm();
-                this.renderMethodsList();
-                this.updateDropdowns();
-                this.saveData();
-            }
-
-            clearMethodForm() {
-                document.getElementById('editing-method-index').value = '';
+                // Reset form
                 document.getElementById('new-method-name').value = '';
+                document.getElementById('method-steps-container').innerHTML = '';
+                this.addMethodStep(true);
                 document.getElementById('method-total-time-min').value = '';
                 document.getElementById('method-total-time-sec').value = '';
-                document.getElementById('method-steps-container').innerHTML = '';
-                // Add one default step
-                this.addMethodStep();
-            }
 
-            renderMethodsList() {
-                const container = document.getElementById('method-list-container');
-                
-                if (this.extractionMethods.length === 0) {
-                    container.innerHTML = '<p>まだメソッドが登録されていません。</p>';
-                    return;
-                }
 
-                container.innerHTML = this.extractionMethods.map((method, index) => `
-                    <div class="method-item">
-                        <div>
-                            <strong>${method.name}</strong>
-                            <div class="method-item-details">
-                                ${method.steps.length}ステップ | 
-                                ${method.totalTimeMinutes}:${String(method.totalTimeSeconds).padStart(2, '0')}
-                            </div>
-                        </div>
-                        <div class="method-item-actions">
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.viewMethodDetails(${index})">詳細</button>
-                            <button class="btn btn-secondary btn-small" onclick="coffeeLogger.editMethod(${index})">編集</button>
-                            <button class="btn btn-danger btn-small" onclick="coffeeLogger.deleteMethod(${index})">削除</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            viewMethodDetails(index) {
-                const method = this.extractionMethods[index];
-                if (!method) return;
-
-                // Populate modal with method data
-                document.getElementById('modal-method-name-title').textContent = method.name;
-                document.getElementById('modal-method-total-time').textContent = 
-                    `${method.totalTimeMinutes}:${String(method.totalTimeSeconds).padStart(2, '0')}`;
-
-                const stepsContainer = document.getElementById('modal-method-steps');
-                stepsContainer.innerHTML = method.steps.map((step, stepIndex) => `
-                    <div style="margin-bottom: 10px; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
-                        <strong>ステップ ${stepIndex + 1}:</strong> ${step.description}<br>
-                        <small>⏰ ${step.minutes}:${String(step.seconds).padStart(2, '0')} | 💧 ${step.amount}g</small>
-                    </div>
-                `).join('');
-
-                this.currentMethodIndex = index;
-                document.getElementById('method-details-modal').style.display = 'block';
-            }
-
-            editMethod(index) {
-                const method = this.extractionMethods[index];
-                if (!method) return;
-
-                // Populate form with method data
-                document.getElementById('editing-method-index').value = index;
-                document.getElementById('new-method-name').value = method.name;
-                document.getElementById('method-total-time-min').value = method.totalTimeMinutes;
-                document.getElementById('method-total-time-sec').value = method.totalTimeSeconds;
-
-                // Clear existing steps
-                document.getElementById('method-steps-container').innerHTML = '';
-
-                // Add method steps
-                method.steps.forEach(step => {
-                    const container = document.getElementById('method-steps-container');
-                    const stepIndex = container.children.length;
-                    
-                    const stepHtml = `
-                        <div class="method-step" data-step="${stepIndex}">
-                            <input type="text" class="form-control" placeholder="手順の説明" data-field="description" value="${step.description}">
-                            <div class="time-input-group">
-                                <input type="number" class="form-control" placeholder="分" min="0" data-field="minutes" style="width: 60px;" value="${step.minutes}">
-                                <span>:</span>
-                                <input type="number" class="form-control" placeholder="秒" min="0" max="59" data-field="seconds" style="width: 60px;" value="${step.seconds}">
-                            </div>
-                            <input type="number" class="form-control" placeholder="注水量(g)" data-field="amount" style="width: 100px;" value="${step.amount}">
-                            <button type="button" class="btn btn-danger btn-small" onclick="this.parentElement.remove()">削除</button>
-                        </div>
-                    `;
-                    
-                    container.insertAdjacentHTML('beforeend', stepHtml);
-                });
-            }
-
-            editMethodFromModal() {
-                if (this.currentMethodIndex !== null && this.currentMethodIndex !== undefined) {
-                    this.editMethod(this.currentMethodIndex);
-                }
+                this.showNotification('✅ 新しい抽出メソッドを保存しました');
             }
 
             deleteMethod(index) {
-                if (confirm('このメソッドを削除しますか？')) {
-                    this.extractionMethods.splice(index, 1);
-                    this.renderMethodsList();
-                    this.updateDropdowns();
-                    this.showNotification('メソッドを削除しました');
-                    this.saveData();
+                const methodName = this.methods[index].name;
+                if(confirm(`「${methodName}」を本当に削除しますか？`)){
+                    this.methods.splice(index, 1);
+                    this.saveMethods();
+                    this.updateMethodManagementUI();
+                    this.updateMethodSelectionDropdown();
+                    this.showNotification(`🗑️「${methodName}」を削除しました`);
                 }
             }
-
-            // Drip Timer
+            
             startDripTimer() {
                 const methodName = document.getElementById('extraction-method').value;
-                const method = this.extractionMethods.find(m => m.name === methodName);
-                
-                if (!method) {
-                    this.showNotification('メソッドを選択してください', 'warning');
-                    return;
-                }
+                const method = this.methods.find(m => m.name === methodName);
+                if (!method) return;
 
-                this.dripTimer.steps = method.steps;
-                this.dripTimer.currentStep = 0;
-                this.dripTimer.isRunning = false;
-                this.dripTimer.startTime = null;
-                this.dripTimer.totalTime = 0;
-
-                // Populate timer modal
                 const stepsContainer = document.getElementById('drip-timer-steps');
-                stepsContainer.innerHTML = method.steps.map((step, index) => `
-                    <div class="timer-step" data-step="${index}">
-                        <strong>${step.minutes}:${String(step.seconds).padStart(2, '0')}</strong> - 
-                        ${step.description} (${step.amount}g)
-                    </div>
-                `).join('');
+                stepsContainer.innerHTML = '';
+                 let cumulativeTime = 0;
+                method.steps.forEach((step, index) => {
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'timer-step';
+                    cumulativeTime += step.minutes * 60 + step.seconds;
+                    stepEl.dataset.time = cumulativeTime;
 
+                    let text = `${index + 1}. ${step.action}`;
+                    if (index > 0) text += ` @ ${step.minutes}:${String(step.seconds).padStart(2, '0')}`;
+                    if (step.waterAmount) text += ` - ${step.waterAmount}g`;
+                    stepEl.textContent = text;
+                    stepsContainer.appendChild(stepEl);
+                });
+                
+                const totalTimeStep = document.createElement('div');
+                totalTimeStep.className = 'timer-step';
+                totalTimeStep.dataset.time = method.totalTime;
+                totalTimeStep.textContent = `🏁 完了: ${Math.floor(method.totalTime / 60)}:${String(method.totalTime % 60).padStart(2, '0')}`;
+                stepsContainer.appendChild(totalTimeStep);
+
+
+                this.resetDripTimer();
                 document.getElementById('drip-timer-modal').style.display = 'block';
-                this.updateTimerDisplay();
-            }
-
-            toggleDripTimer() {
-                if (this.dripTimer.isRunning) {
-                    this.pauseDripTimer();
-                } else {
-                    this.resumeDripTimer();
-                }
-            }
-
-            resumeDripTimer() {
-                this.dripTimer.isRunning = true;
-                this.dripTimer.startTime = Date.now() - this.dripTimer.totalTime;
-                document.getElementById('drip-timer-start-stop').textContent = 'ストップ';
-                
-                this.dripTimer.interval = setInterval(() => {
-                    this.updateTimerDisplay();
-                    this.checkTimerSteps();
-                }, 100);
-            }
-
-            pauseDripTimer() {
-                this.dripTimer.isRunning = false;
-                clearInterval(this.dripTimer.interval);
-                document.getElementById('drip-timer-start-stop').textContent = 'スタート';
-            }
-
-            resetDripTimer() {
-                this.pauseDripTimer();
-                this.dripTimer.totalTime = 0;
-                this.dripTimer.currentStep = 0;
-                this.updateTimerDisplay();
-                
-                // Reset step highlighting
-                document.querySelectorAll('.timer-step').forEach(step => {
-                    step.classList.remove('active');
-                });
-            }
-
-            updateTimerDisplay() {
-                if (this.dripTimer.isRunning) {
-                    this.dripTimer.totalTime = Date.now() - this.dripTimer.startTime;
-                }
-                
-                const minutes = Math.floor(this.dripTimer.totalTime / 60000);
-                const seconds = Math.floor((this.dripTimer.totalTime % 60000) / 1000);
-                const deciseconds = Math.floor((this.dripTimer.totalTime % 1000) / 100);
-                
-                document.getElementById('drip-timer-display').textContent = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${deciseconds}`;
-            }
-
-            checkTimerSteps() {
-                const currentTimeSeconds = this.dripTimer.totalTime / 1000;
-                
-                this.dripTimer.steps.forEach((step, index) => {
-                    const stepTimeSeconds = step.minutes * 60 + step.seconds;
-                    const stepElement = document.querySelector(`.timer-step[data-step="${index}"]`);
-                    
-                    if (currentTimeSeconds >= stepTimeSeconds && index === this.dripTimer.currentStep) {
-                        stepElement.classList.add('active');
-                        this.dripTimer.currentStep++;
-                        
-                        // Optional: Play notification sound or vibrate
-                        if ('vibrate' in navigator) {
-                            navigator.vibrate(200);
-                        }
-                    }
-                });
             }
 
             hideDripTimer() {
-                this.pauseDripTimer();
+                this.toggleDripTimer(true); // Force stop
                 document.getElementById('drip-timer-modal').style.display = 'none';
             }
 
-            // Charts and Analytics
-            initCharts() {
-                // Initialize empty charts
-                this.initSatisfactionChart();
-                this.initBeanChart();
-                this.initTasteChart();
-            }
-
-            initSatisfactionChart() {
-                const ctx = document.getElementById('satisfactionChart').getContext('2d');
-                this.charts.satisfaction = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: '満足度',
-                            data: [],
-                            borderColor: '#8B4513',
-                            backgroundColor: 'rgba(139, 69, 19, 0.1)',
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 10
-                            }
-                        }
-                    }
-                });
-            }
-
-            initBeanChart() {
-                const ctx = document.getElementById('beanChart').getContext('2d');
-                this.charts.bean = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: '平均満足度',
-                            data: [],
-                            backgroundColor: '#D2691E'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 10
-                            }
-                        }
-                    }
-                });
-            }
-
-            initTasteChart() {
-                const ctx = document.getElementById('tasteMapChart').getContext('2d');
-                this.charts.taste = new Chart(ctx, {
-                    type: 'scatter',
-                    data: {
-                        datasets: []
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: '酸味 ← → 苦味'
-                                },
-                                min: 1,
-                                max: 10
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'コク ← → ソフト'
-                                },
-                                min: 1,
-                                max: 10
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const record = context.raw.record;
-                                        return `${record.beanType} (満足度: ${record.satisfaction}/10)`;
-                                    }
-                                }
-                            }
-                        },
-                        onClick: (event, elements) => {
-                            if (elements.length > 0) {
-                                const dataIndex = elements[0].index;
-                                const datasetIndex = elements[0].datasetIndex;
-                                const record = this.charts.taste.data.datasets[datasetIndex].data[dataIndex].record;
-                                this.showTasteChartDetails(record);
-                            }
-                        }
-                    }
-                });
-
-                this.updateTasteChartFilters();
-            }
-
-            updateAnalyticsCharts() {
-                this.updateSatisfactionChart();
-                this.updateBeanChart();
-                this.updateBestRecipe();
-            }
-
-            updateSatisfactionChart() {
-                // Get last 30 days of data
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                
-                const recentRecords = this.records.filter(record => 
-                    new Date(record.brewDatetime) >= thirtyDaysAgo
-                ).sort((a, b) => new Date(a.brewDatetime) - new Date(b.brewDatetime));
-                
-                const labels = recentRecords.map(record => 
-                    new Date(record.brewDatetime).toLocaleDateString('ja-JP')
-                );
-                const data = recentRecords.map(record => record.satisfaction);
-                
-                this.charts.satisfaction.data.labels = labels;
-                this.charts.satisfaction.data.datasets[0].data = data;
-                this.charts.satisfaction.update();
-            }
-
-            updateBeanChart() {
-                // Calculate average satisfaction by bean type
-                const beanStats = {};
-                this.records.forEach(record => {
-                    if (!beanStats[record.beanType]) {
-                        beanStats[record.beanType] = { total: 0, count: 0 };
-                    }
-                    beanStats[record.beanType].total += record.satisfaction;
-                    beanStats[record.beanType].count++;
-                });
-                
-                const labels = Object.keys(beanStats);
-                const data = labels.map(bean => beanStats[bean].total / beanStats[bean].count);
-                
-                this.charts.bean.data.labels = labels;
-                this.charts.bean.data.datasets[0].data = data;
-                this.charts.bean.update();
-            }
-
-            updateBestRecipe() {
-                if (this.records.length === 0) {
-                    document.getElementById('best-recipe').innerHTML = '<p>データを蓄積中...</p>';
-                    return;
+            toggleDripTimer(forceStop = false) {
+                const btn = document.getElementById('drip-timer-start-stop');
+                if (this.dripTimer.running && !forceStop) { // Stop
+                    this.dripTimer.running = false;
+                    clearInterval(this.dripTimer.interval);
+                    this.dripTimer.elapsedTime += Date.now() - this.dripTimer.startTime;
+                    btn.textContent = 'スタート';
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-primary');
+                } else if (!this.dripTimer.running && !forceStop) { // Start
+                    this.dripTimer.running = true;
+                    this.dripTimer.startTime = Date.now();
+                    this.dripTimer.interval = setInterval(() => this._updateDripTimerDisplay(), 100);
+                    btn.textContent = 'ストップ';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-danger');
+                } else if (forceStop) { // Hide modal stop
+                     this.dripTimer.running = false;
+                    clearInterval(this.dripTimer.interval);
                 }
-                
-                // Find highest rated recipe from this month
-                const thisMonth = new Date();
-                thisMonth.setDate(1);
-                
-                const thisMonthRecords = this.records.filter(record => 
-                    new Date(record.brewDatetime) >= thisMonth
-                );
-                
-                if (thisMonthRecords.length === 0) {
-                    document.getElementById('best-recipe').innerHTML = '<p>今月の記録がまだありません。</p>';
-                    return;
-                }
-                
-                const bestRecord = thisMonthRecords.reduce((best, current) => 
-                    current.satisfaction > best.satisfaction ? current : best
-                );
-                
-                document.getElementById('best-recipe').innerHTML = `
-                    <div class="card" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #333;">
-                        <h4>🏆 ${bestRecord.beanType}</h4>
-                        <p><strong>満足度:</strong> ${bestRecord.satisfaction}/10</p>
-                        <p><strong>豆量:</strong> ${bestRecord.beanWeight}g | <strong>挽き目:</strong> ${bestRecord.grindSize}</p>
-                        <p><strong>湯温:</strong> ${bestRecord.waterTemperature}°C | <strong>湯量:</strong> ${bestRecord.waterWeight}g</p>
-                        <p><strong>テーマ:</strong> ${bestRecord.theme || '-'}</p>
-                        <button class="btn btn-primary" onclick="coffeeLogger.viewRecordDetails(${bestRecord.id})">詳細を見る</button>
-                    </div>
-                `;
+            }
+            
+            _updateDripTimerDisplay() {
+                const now = Date.now();
+                const totalElapsed = this.dripTimer.elapsedTime + (now - this.dripTimer.startTime);
+                const secondsFloat = totalElapsed / 1000;
+                const secondsInt = Math.floor(secondsFloat);
+                const minutes = Math.floor(secondsInt / 60);
+                const displaySeconds = secondsInt % 60;
+                const tenths = Math.floor((secondsFloat * 10) % 10);
+                document.getElementById('drip-timer-display').textContent = `${String(minutes).padStart(2, '0')}:${String(displaySeconds).padStart(2, '0')}.${tenths}`;
+
+                // Highlight current step
+                document.querySelectorAll('#drip-timer-steps .timer-step').forEach(stepEl => stepEl.classList.remove('active'));
+                const currentStep = Array.from(document.querySelectorAll('#drip-timer-steps .timer-step')).find(stepEl => secondsFloat < stepEl.dataset.time);
+                 if (currentStep) {
+                     currentStep.classList.add('active');
+                 }
             }
 
-            updateTasteChart() {
-                this.updateTasteChartFilters();
-                
-                // Group records by bean type
-                const beanGroups = {};
-                this.records.forEach(record => {
-                    if (!beanGroups[record.beanType]) {
-                        beanGroups[record.beanType] = [];
-                    }
-                    beanGroups[record.beanType].push(record);
-                });
-                
-                // Create dataset for each bean type
-                const datasets = [];
-                const colors = ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#DAA520'];
-                let colorIndex = 0;
-                
-                Object.keys(beanGroups).forEach(beanType => {
-                    const checkbox = document.querySelector(`input[data-bean="${beanType}"]`);
-                    if (!checkbox || !checkbox.checked) return;
-                    
-                    const data = beanGroups[beanType].map(record => ({
-                        x: record.acidityBitterness,
-                        y: record.richnessSoftness,
-                        record: record
-                    }));
-                    
-                    datasets.push({
-                        label: beanType,
-                        data: data,
-                        backgroundColor: colors[colorIndex % colors.length],
-                        borderColor: colors[colorIndex % colors.length],
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    });
-                    
-                    colorIndex++;
-                });
-                
-                this.charts.taste.data.datasets = datasets;
-                this.charts.taste.update();
+
+            resetDripTimer() {
+                this.dripTimer.running = false;
+                clearInterval(this.dripTimer.interval);
+                this.dripTimer.elapsedTime = 0;
+                this.dripTimer.startTime = 0;
+                document.getElementById('drip-timer-display').textContent = '00:00.0';
+                const btn = document.getElementById('drip-timer-start-stop');
+                btn.textContent = 'スタート';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-primary');
+                document.querySelectorAll('#drip-timer-steps .timer-step').forEach(stepEl => stepEl.classList.remove('active'));
             }
 
-            updateTasteChartFilters() {
-                const container = document.getElementById('taste-chart-filter-container');
-                const beanTypes = [...new Set(this.records.map(r => r.beanType))];
-                
-                container.innerHTML = beanTypes.map(beanType => `
-                    <div class="filter-item">
-                        <input type="checkbox" id="filter-${beanType}" data-bean="${beanType}" checked onchange="coffeeLogger.updateTasteChart()">
-                        <label for="filter-${beanType}">${beanType}</label>
-                    </div>
-                `).join('');
-            }
-
-            showTasteChartDetails(record) {
-                const detailsContainer = document.getElementById('taste-chart-details');
-                detailsContainer.innerHTML = `
-                    <h4>レシピ詳細</h4>
-                    <p><strong>豆の種類:</strong> ${record.beanType}</p>
-                    <p><strong>抽出日時:</strong> ${this.formatDateTime(record.brewDatetime)}</p>
-                    <p><strong>豆量:</strong> ${record.beanWeight}g</p>
-                    <p><strong>挽き目:</strong> ${record.grindSize}</p>
-                    <p><strong>湯温:</strong> ${record.waterTemperature}°C</p>
-                    <p><strong>湯量:</strong> ${record.waterWeight}g</p>
-                    <p><strong>味のバランス:</strong> ${record.acidityBitterness}/10</p>
-                    <p><strong>ボディ:</strong> ${record.richnessSoftness}/10</p>
-                    <p><strong>満足度:</strong> ${record.satisfaction}/10</p>
-                    <p><strong>印象:</strong> ${record.impression || '-'}</p>
-                    <button class="btn btn-secondary btn-small" onclick="coffeeLogger.viewRecordDetails(${record.id})">詳細を見る</button>
-                `;
-            }
-
-            showNotification(message, type = 'success') {
-                const notification = document.getElementById('notification');
-                notification.textContent = message;
-                notification.className = `notification ${type}`;
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
+            // --- Presets ---
+            updatePresetsDisplay() { const container = document.getElementById('preset-buttons'); if (this.presets.length === 0) { container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">プリセットなし</p>'; return; } container.innerHTML = this.presets.map((preset, index) => `<div class="preset-btn" onclick="applyPreset(${index})"><strong>${preset.name}</strong><br><small>${preset.recipe.beanType} | ${preset.recipe.beanWeight}g</small></div>`).join(''); }
+            saveAsPreset() { const name = prompt('プリセット名を入力:'); if (!name) return; const record = this.getCurrentRecipe(); record.name = name; this.presets.push(record); this.savePresets(); this.updatePresetsDisplay(); this.showNotification('⚙️ プリセットを保存しました'); }
+            
+            showNotification(message, type = 'success') { const n = document.getElementById('notification'); n.textContent = message; n.className = `notification show ${type}`; setTimeout(() => n.classList.remove('show'), 3000); }
         }
 
-        // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            coffeeLogger = new CoffeeLogger();
-        });
+        // --- Global Helper Functions ---
+        function showTab(tabName, event) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if (tabName === 'analytics') setTimeout(() => coffeeLogger.generateAnalytics(), 100);
+            if (tabName === 'taste-chart') setTimeout(() => coffeeLogger.updateTasteMapChart(), 100);
+            if (tabName === 'history') coffeeLogger.updateHistoryDisplay();
+        }
+
+        function handleSaveClick() { coffeeLogger.handleSaveClick(); }
+        function loadLastRecipe() { coffeeLogger.loadLastRecipe(); }
+        function saveAsPreset() { coffeeLogger.saveAsPreset(); }
+        function addBean() { coffeeLogger.addBean(); }
+        function deleteBean(index) { coffeeLogger.deleteBean(index); }
+        function applyPreset(index) { coffeeLogger.applyRecipe(coffeeLogger.presets[index]); }
+        function applyRecipeById(date) {
+            const record = coffeeLogger.records.find(r => r.date === date);
+            if(record) coffeeLogger.applyRecipe(record);
+        }
+        function showRecordDetails(recordDate) {
+            coffeeLogger.showRecordDetails(recordDate);
+        }
+        function hideRecordDetails() {
+            document.getElementById('record-details-modal').style.display = 'none';
+        }
+        function editRecord(recordDate) {
+            coffeeLogger.editRecord(recordDate);
+        }
+        // --- Method & Timer functions ---
+        function addMethodStep() { coffeeLogger.addMethodStep(); }
+        function removeMethodStep(button) { coffeeLogger.removeMethodStep(button); }
+        function saveMethod() { coffeeLogger.saveMethod(); }
+        function deleteMethod(index) { coffeeLogger.deleteMethod(index); }
+        function startDripTimer() { coffeeLogger.startDripTimer(); }
+        function hideDripTimer() { coffeeLogger.hideDripTimer(); }
+        function toggleDripTimer() { coffeeLogger.toggleDripTimer(); }
+        function resetDripTimer() { coffeeLogger.resetDripTimer(); }
+
+
+        let coffeeLogger;
+        document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); });
     </script>
+</body>
+</html>
+
