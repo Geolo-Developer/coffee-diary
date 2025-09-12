@@ -199,6 +199,13 @@
             flex-wrap: wrap;
         }
 
+        .ratio-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+
         .star {
             font-size: 24px;
             color: var(--border-color);
@@ -663,7 +670,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>☕ コーヒー物語日記</h1>
+            <h1>☕ Daily Brew Logger</h1>
             <p class="subtitle">毎日のコーヒー抽出を記録・分析して、理想の一杯を追求しよう</p>
         </div>
 
@@ -700,17 +707,19 @@
                 <div class="card">
                     <fieldset>
                         <legend>抽出レシピ</legend>
-                        <div class="form-group">
-                            <label for="brew-datetime">抽出日時</label>
-                            <input type="datetime-local" id="brew-datetime" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="bean-type">豆の種類</label>
-                            <select id="bean-type" class="form-control"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="bean-weight">豆の量 (g)</label>
-                            <input type="number" id="bean-weight" class="form-control" placeholder="例: 15" step="0.1">
+                        <div class="form-group ratio-group">
+                            <div>
+                                <label for="bean-weight">豆の量 (g)</label>
+                                <input type="number" id="bean-weight" class="form-control" placeholder="15" step="0.1">
+                            </div>
+                            <div>
+                                <label for="brew-ratio">比率 (1:)</label>
+                                <input type="number" id="brew-ratio" class="form-control" placeholder="15">
+                            </div>
+                            <div>
+                                <label for="water-weight">お湯の量 (g)</label>
+                                <input type="number" id="water-weight" class="form-control" placeholder="225">
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="grind-size">挽き目</label>
@@ -725,16 +734,12 @@
                         </div>
                         <div class="form-group">
                             <label for="dripper">ドリッパー</label>
-                             <select id="dripper" class="form-control">
+                            <select id="dripper" class="form-control">
                                 <option value="V60円錐ペーパーフィルター">V60円錐ペーパーフィルター</option>
                                 <option value="台形ペーパーフィルター">台形ペーパーフィルター</option>
                                 <option value="ステンレスフィルター">ステンレスフィルター</option>
                                 <option value="その他">その他</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="water-weight">お湯の量 (g)</label>
-                            <input type="number" id="water-weight" class="form-control" placeholder="例: 225">
                         </div>
                         <div class="form-group">
                             <label for="water-temperature">湯温 (°C)</label>
@@ -762,60 +767,54 @@
                     </fieldset>
 
                     <fieldset>
-                         <legend>テイスティングノート</legend>
-                         <div class="form-group">
-                            <label for="impression">味わいの第一印象</label>
-                            <input type="text" id="impression" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="mouthfeel">口当たり（マウスフィール）</label>
-                            <input type="text" id="mouthfeel" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="aftertaste">後味（アフターテイスト）</label>
-                            <input type="text" id="aftertaste" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="temperature-change">温度変化による味の移ろい</label>
-                            <input type="text" id="temperature-change" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>味のバランス</label>
-                            <div class="slider-container">
-                                <input type="range" id="acidity-bitterness" class="slider" min="1" max="10" value="5" step="1">
+                        <legend>テイスティングノート</legend>
+                        <div class="rating-container">
+                            <div class="rating-row">
+                                <span class="rating-label">香り</span>
+                                <div class="stars" data-rating="aroma">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
                             </div>
-                            <div class="slider-labels">
-                                <span>酸味</span><span>苦味</span>
+                            <div class="rating-row">
+                                <span class="rating-label">酸味</span>
+                                <div class="stars" data-rating="acidity">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">甘さ</span>
+                                <div class="stars" data-rating="sweetness">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">苦み</span>
+                                <div class="stars" data-rating="bitterness">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">ボディ</span>
+                                <div class="stars" data-rating="body">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">余韻</span>
+                                <div class="stars" data-rating="aftertaste_rating">
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
+                                </div>
                             </div>
                         </div>
-                         <div class="form-group">
-                            <label>ボディ</label>
-                             <div class="slider-container">
-                                <input type="range" id="richness-softness" class="slider" min="1" max="10" value="5" step="1">
-                            </div>
-                            <div class="slider-labels">
-                                <span>コク</span><span>ソフト</span>
-                            </div>
-                        </div>
-
                     </fieldset>
 
-                     <fieldset>
-                         <legend>総合評価</legend>
+                    <fieldset>
+                        <legend>総合評価</legend>
                         <div class="rating-container">
-                             <div class="rating-row">
+                            <div class="rating-row">
                                 <span class="rating-label">総合満足度</span>
                                 <div class="stars" data-rating="satisfaction">
-                                    <span class="star" data-value="1">★</span>
-                                    <span class="star" data-value="2">★</span>
-                                    <span class="star" data-value="3">★</span>
-                                    <span class="star" data-value="4">★</span>
-                                    <span class="star" data-value="5">★</span>
-                                    <span class="star" data-value="6">★</span>
-                                    <span class="star" data-value="7">★</span>
-                                    <span class="star" data-value="8">★</span>
-                                    <span class="star" data-value="9">★</span>
-                                    <span class="star" data-value="10">★</span>
+                                    <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span>
                                 </div>
                             </div>
                         </div>
@@ -900,54 +899,72 @@
 
         <!-- 設定タブ -->
         <div id="settings" class="tab-content">
-             <div class="card">
-                <h3>⚙️ スプレッドシート連携</h3>
-                 <div class="api-settings">
-                    <div class="form-group">
-                        <label for="google-sheet-url">Googleスプレッドシート連携URL</label>
-                        <input type="url" id="google-sheet-url" class="form-control" placeholder="https://script.google.com/macros/s/...">
-                         <small style="color: #666; margin-top: 5px; display: block;">
-                            Google Apps Scriptで作成したウェブアプリのURLを貼り付けてください
-                        </small>
-                    </div>
-                    <div class="api-status">
-                        <span class="status-indicator" id="api-status-sheet"></span>
-                        <span id="api-status-text-sheet">未設定</span>
-                    </div>
-                </div>
-            </div>
-
+             
             <div class="card">
                 <h3>MY BEANS</h3>
                 <p>お持ちのコーヒー豆を登録・管理します。</p>
                 <div class="api-settings"> 
-                    <div class="form-group">
-                        <label for="new-bean-name">新しい豆の名前</label>
-                        <input type="text" id="new-bean-name" class="form-control" placeholder="例: エチオピア イルガチェフェ">
-                    </div>
-                    <div class="form-group">
-                        <label for="roast-level">煎り度</label>
-                        <select id="roast-level" class="form-control">
-                            <option value="浅煎り">浅煎り (Light)</option>
-                            <option value="中浅煎り">中浅煎り (Cinnamon)</option>
-                            <option value="中煎り">中煎り (Medium)</option>
-                            <option value="中深煎り">中深煎り (High)</option>
-                            <option value="深煎り">深煎り (City)</option>
-                            <option value="極深煎り">極深煎り (Full City)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="roast-date">焙煎日</label>
-                        <div class="roast-date-group">
-                            <input type="date" id="roast-date" class="form-control">
-                            <input type="checkbox" id="roast-date-unknown">
-                            <label for="roast-date-unknown">不明</label>
+                    <div class="modal-grid">
+                        <div class="form-group">
+                            <label for="new-bean-name">豆の名前</label>
+                            <input type="text" id="new-bean-name" class="form-control" placeholder="例: エチオピア イルガチェフェ">
+                        </div>
+                        <div class="form-group">
+                            <label for="bean-url">豆のURL</label>
+                            <input type="url" id="bean-url" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label for="store-name">販売店</label>
+                            <input type="text" id="store-name" class="form-control" placeholder="例: 〇〇コーヒー">
+                        </div>
+                        <div class="form-group">
+                            <label for="store-url">販売店のURL</label>
+                            <input type="url" id="store-url" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label for="roast-level">焙煎度</label>
+                            <select id="roast-level" class="form-control">
+                                <option value="ライト">ライト (Light)</option>
+                                <option value="シナモン">シナモン (Cinnamon)</option>
+                                <option value="ミディアム">ミディアム (Medium)</option>
+                                <option value="ハイ">ハイ (High)</option>
+                                <option value="シティ">シティ (City)</option>
+                                <option value="フルシティ">フルシティ (Full City)</option>
+                                <option value="フレンチ">フレンチ (French)</option>
+                                <option value="イタリアン">イタリアン (Italian)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="roast-date">焙煎日</label>
+                            <div class="roast-date-group">
+                                <input type="date" id="roast-date" class="form-control">
+                                <input type="checkbox" id="roast-date-unknown">
+                                <label for="roast-date-unknown">不明</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-type">購入形式</label>
+                            <select id="purchase-type" class="form-control">
+                                <option value="豆">豆</option>
+                                <option value="粉">粉</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">価格（円）</label>
+                            <input type="number" id="price" class="form-control" placeholder="例: 1500">
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-weight">購入量（g）</label>
+                            <input type="number" id="purchase-weight" class="form-control" placeholder="例: 200">
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-date">購入日</label>
+                            <input type="date" id="purchase-date" class="form-control">
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="addBean()">＋ 追加</button>
+                    <button class="btn btn-primary" onclick="addBean()">＋ 豆を登録</button>
                 </div>
                 <div id="bean-list-container" style="margin-top: 20px;">
-                </div>
             </div>
 
             <div class="card">
@@ -978,13 +995,6 @@
                 <div id="method-list-container" style="margin-top: 20px;"></div>
             </div>
 
-            <div class="card">
-                <h3>📜 よく使うレシピ</h3>
-                <div class="preset-buttons" id="preset-buttons">
-                    <!-- プリセットボタンが動的に生成される -->
-                </div>
-                <button class="btn btn-primary" onclick="saveAsPreset()">現在の設定をプリセットに保存</button>
-            </div>
         </div>
     </div>
 
@@ -1048,42 +1058,31 @@
         class CoffeeLogger {
             constructor() {
                 this.records = this.loadRecords();
-                this.presets = this.loadPresets();
                 this.beans = this.loadBeans();
                 this.methods = this.loadMethods();
-                this.sheetUrl = this.loadSheetUrl();
                 this.satisfactionChartInstance = null;
                 this.beanChartInstance = null;
                 this.tasteMapChartInstance = null;
-                this.ratings = { satisfaction: 0 };
+                this.ratings = { satisfaction: 0, aroma: 0, acidity: 0, sweetness: 0, bitterness: 0, body: 0, aftertaste_rating: 0 };
                 this.sortConfig = { key: 'date', direction: 'desc' };
                 this.dripTimer = { interval: null, startTime: 0, elapsedTime: 0, running: false };
                 this.initializeApp();
             }
 
             // --- Local Storage Handlers ---
+            // --- Local Storage Handlers ---
             loadRecords() { return JSON.parse(localStorage.getItem('coffee-records')) || []; }
             saveRecords() { localStorage.setItem('coffee-records', JSON.stringify(this.records)); }
-            loadPresets() { return JSON.parse(localStorage.getItem('coffee-presets')) || []; }
-            savePresets() { localStorage.setItem('coffee-presets', JSON.stringify(this.presets)); }
             loadBeans() { return JSON.parse(localStorage.getItem('coffee-beans')) || []; }
             saveBeans() { localStorage.setItem('coffee-beans', JSON.stringify(this.beans)); }
             loadMethods() { return JSON.parse(localStorage.getItem('coffee-methods')) || []; }
             saveMethods() { localStorage.setItem('coffee-methods', JSON.stringify(this.methods)); }
-            loadSheetUrl() { return localStorage.getItem('google-sheet-url') || ''; }
-            saveSheetUrl(url) {
-                localStorage.setItem('google-sheet-url', url);
-                this.sheetUrl = url;
-                document.getElementById('google-sheet-url').value = url;
-                this.updateSheetStatus();
-            }
             
             initializeApp() {
                 this.updateTodayDate();
                 this.updateSummaryStats();
                 this.setupEventListeners();
                 this.updateHistoryDisplay();
-                this.updatePresetsDisplay();
                 this.updateBeanManagementUI();
                 this.updateBeanSelectionDropdown();
                 this.updateMethodManagementUI();
@@ -1091,25 +1090,10 @@
                 this.updateTasteChartFilter();
                 this.generateAnalytics();
                 this.updateTasteMapChart();
-                this.updateSheetStatus();
                 this.setDefaultBrewDateTime();
                 this.addMethodStep(true); // Add initial step for method creation
-                
-                if (this.sheetUrl) document.getElementById('google-sheet-url').value = this.sheetUrl;
             }
-
-            updateSheetStatus() {
-                const sheetStatus = document.getElementById('api-status-sheet');
-                const sheetText = document.getElementById('api-status-text-sheet');
-                if (this.sheetUrl) {
-                    sheetStatus.classList.add('connected');
-                    sheetText.textContent = 'URL設定済み';
-                } else {
-                    sheetStatus.classList.remove('connected');
-                    sheetText.textContent = '未設定';
-                }
-            }
-
+           
             setupEventListeners() {
                 // Star ratings
                 document.querySelectorAll('.stars').forEach(container => {
@@ -1119,20 +1103,17 @@
                         }
                     });
                     container.addEventListener('mouseover', e => {
-                         if (e.target.classList.contains('star')) {
+                        if (e.target.classList.contains('star')) {
                             const stars = container.querySelectorAll('.star');
                             const rating = parseInt(e.target.dataset.value);
                             stars.forEach((star, i) => star.classList.toggle('hover', i < rating));
-                         }
+                        }
                     });
                     container.addEventListener('mouseleave', () => {
                         container.querySelectorAll('.star').forEach(s => s.classList.remove('hover'));
                     });
                 });
 
-                // Sheet URL saving
-                document.getElementById('google-sheet-url').addEventListener('change', e => this.saveSheetUrl(e.target.value));
-            
                 // Roast date unknown checkbox
                 const roastDateInput = document.getElementById('roast-date');
                 const roastDateUnknown = document.getElementById('roast-date-unknown');
@@ -1142,6 +1123,11 @@
                         roastDateInput.value = '';
                     }
                 });
+
+                // Brew ratio calculator
+                document.getElementById('bean-weight').addEventListener('input', () => this.calculateBrewRatios());
+                document.getElementById('brew-ratio').addEventListener('input', () => this.calculateBrewRatios());
+                document.getElementById('water-weight').addEventListener('input', () => this.calculateBrewRatios());
 
                 document.getElementById('extraction-method').addEventListener('change', (e) => {
                     document.getElementById('drip-timer-btn').disabled = !e.target.value;
@@ -1202,15 +1188,18 @@
                 this.beans.forEach((bean, index) => {
                     const item = document.createElement('div');
                     item.className = 'bean-item';
-                    const roastInfo = bean.roastDate === '不明' ? '焙煎日: 不明' : `焙煎日: ${bean.roastDate}`;
                     item.innerHTML = `
                         <div>
-                            <span>${bean.name}</span>
+                            <span><strong>${bean.name}</strong></span>
                             <div class="bean-item-details">
-                                ${bean.roastLevel || ''} / ${roastInfo}
+                                ${bean.storeName || 'お店不明'} / ${bean.roastLevel || '焙煎度不明'}
                             </div>
                         </div>
-                        <button class="btn-danger" onclick="deleteBean(${index})">削除</button>
+                        <div class="btn-group" style="gap: 5px;">
+                            <button class="btn btn-secondary btn-small" onclick="showBeanDetails(${index})">詳細</button>
+                            <button class="btn btn-secondary btn-small" onclick="editBean(${index})">編集</button>
+                            <button class="btn-danger btn-small" onclick="deleteBean(${index})">削除</button>
+                        </div>
                     `;
                     container.appendChild(item);
                 });
@@ -1232,25 +1221,41 @@
             }
 
             addBean() {
-                const nameInput = document.getElementById('new-bean-name');
-                const roastLevelInput = document.getElementById('roast-level');
-                const roastDateInput = document.getElementById('roast-date');
-                const roastDateUnknown = document.getElementById('roast-date-unknown');
-                
-                const beanName = nameInput.value.trim();
-                if (!beanName) {
+                // 入力値の取得
+                const name = document.getElementById('new-bean-name').value.trim();
+                const url = document.getElementById('bean-url').value;
+                const storeName = document.getElementById('store-name').value;
+                const storeUrl = document.getElementById('store-url').value;
+                const roastLevel = document.getElementById('roast-level').value;
+                const roastDate = document.getElementById('roast-date').value;
+                const isRoastDateUnknown = document.getElementById('roast-date-unknown').checked;
+                const purchaseType = document.getElementById('purchase-type').value;
+                const price = document.getElementById('price').value;
+                const weight = document.getElementById('purchase-weight').value;
+                const purchaseDate = document.getElementById('purchase-date').value;
+
+                // バリデーション
+                if (!name) {
                     this.showNotification('⚠️ 豆の名前を入力してください', 'warning');
                     return;
                 }
-                if (this.beans.some(b => b.name === beanName)) {
+                if (this.beans.some(b => b.name === name)) {
                     this.showNotification('⚠️ 同じ名前の豆が既に存在します', 'warning');
                     return;
                 }
-                
+
+                // 新しい豆オブジェクトの作成
                 const newBean = {
-                    name: beanName,
-                    roastLevel: roastLevelInput.value,
-                    roastDate: roastDateUnknown.checked ? '不明' : roastDateInput.value
+                    name,
+                    url,
+                    storeName,
+                    storeUrl,
+                    roastLevel,
+                    roastDate: isRoastDateUnknown ? '不明' : roastDate,
+                    purchaseType,
+                    price: parseInt(price) || null,
+                    weight: parseInt(weight) || null,
+                    purchaseDate
                 };
 
                 this.beans.push(newBean);
@@ -1258,13 +1263,21 @@
                 this.updateBeanManagementUI();
                 this.updateBeanSelectionDropdown();
                 this.updateTasteChartFilter();
-                
-                nameInput.value = '';
-                roastDateInput.value = '';
-                roastLevelInput.selectedIndex = 2; // Medium
-                roastDateUnknown.checked = false;
-                roastDateInput.disabled = false;
-                
+
+                // フォームのリセット
+                document.getElementById('new-bean-name').value = '';
+                document.getElementById('bean-url').value = '';
+                document.getElementById('store-name').value = '';
+                document.getElementById('store-url').value = '';
+                document.getElementById('roast-level').selectedIndex = 4; // City
+                document.getElementById('roast-date').value = '';
+                document.getElementById('roast-date-unknown').checked = false;
+                document.getElementById('roast-date').disabled = false;
+                document.getElementById('purchase-type').selectedIndex = 0;
+                document.getElementById('price').value = '';
+                document.getElementById('purchase-weight').value = '';
+                document.getElementById('purchase-date').value = '';
+
                 this.showNotification('✅ 新しい豆を登録しました');
             }
 
@@ -1298,10 +1311,6 @@
 
                 this.records.unshift(record);
                 this.saveRecords();
-                
-                if (this.sheetUrl) {
-                    this.sendToSpreadsheet(record);
-                }
 
                 this.updateSummaryStats();
                 this.updateHistoryDisplay();
@@ -1317,16 +1326,10 @@
 
                 const updatedRecord = this.getCurrentRecipe(recordId); // Pass original ID
                 if (!this.validateRecord(updatedRecord)) return;
-                
+
                 this.records[recordIndex] = updatedRecord;
                 this.saveRecords();
 
-                if (this.sheetUrl) {
-                    // Note: This won't update the sheet, only adds a new row.
-                    // True updates would require a more complex Apps Script.
-                    this.sendToSpreadsheet(updatedRecord);
-                }
-                
                 this.updateSummaryStats();
                 this.updateHistoryDisplay();
                 this.generateAnalytics();
@@ -1335,6 +1338,20 @@
                 this.showNotification('✅ 記録を更新しました！');
             }
 
+            deleteRecord(recordDate) {
+                if (confirm('この記録を本当に削除しますか？')) {
+                    const recordIndex = this.records.findIndex(r => r.date === recordDate);
+                    if (recordIndex > -1) {
+                        this.records.splice(recordIndex, 1);
+                        this.saveRecords();
+                        this.updateHistoryDisplay();
+                        this.updateSummaryStats();
+                        this.generateAnalytics();
+                        this.updateTasteMapChart();
+                        this.showNotification('🗑️ 記録を削除しました');
+                    }
+                }
+            }
 
             validateRecord(record) {
                 const r = record.recipe;
@@ -1365,12 +1382,7 @@
                         summary: document.getElementById('summary').value,
                     },
                     tasting: {
-                        impression: document.getElementById('impression').value,
-                        mouthfeel: document.getElementById('mouthfeel').value,
-                        aftertaste: document.getElementById('aftertaste').value,
-                        temperatureChange: document.getElementById('temperature-change').value,
-                        acidityBitterness: parseInt(document.getElementById('acidity-bitterness').value, 10),
-                        richnessSoftness: parseInt(document.getElementById('richness-softness').value, 10),
+                        // 今後のアップデートで使用します
                     },
                     ratings: { ...this.ratings },
                     date: originalDate || brewDate.toISOString()
@@ -1379,9 +1391,9 @@
 
             applyRecipe(record) {
                 if (!record.recipe) { return this.showNotification('古い形式のデータです。', 'warning'); }
-                
+
                 this.setDateTimeInputValue('brew-datetime', new Date(record.date));
-                
+
                 // Recipe
                 document.getElementById('bean-type').value = record.recipe.beanType || '';
                 document.getElementById('bean-weight').value = record.recipe.beanWeight || '';
@@ -1392,16 +1404,20 @@
                 document.getElementById('extraction-method').value = record.recipe.extractionMethod || '';
 
                 // Details & Tasting
-                 document.getElementById('theme').value = record.details.theme || '';
-                 document.getElementById('summary').value = record.details.summary || '';
-                 document.getElementById('impression').value = record.tasting.impression || '';
-                 document.getElementById('mouthfeel').value = record.tasting.mouthfeel || '';
-                 document.getElementById('aftertaste').value = record.tasting.aftertaste || '';
-                 document.getElementById('temperature-change').value = record.tasting.temperatureChange || '';
-                 document.getElementById('acidity-bitterness').value = record.tasting.acidityBitterness || 5;
-                 document.getElementById('richness-softness').value = record.tasting.richnessSoftness || 5;
+                document.getElementById('theme').value = record.details.theme || '';
+                document.getElementById('summary').value = record.details.summary || '';
 
+                // Set ratings
                 this.setRating('satisfaction', record.ratings.satisfaction || 0);
+                this.setRating('aroma', record.ratings.aroma || 0);
+                this.setRating('acidity', record.ratings.acidity || 0);
+                this.setRating('sweetness', record.ratings.sweetness || 0);
+                this.setRating('bitterness', record.ratings.bitterness || 0);
+                this.setRating('body', record.ratings.body || 0);
+                this.setRating('aftertaste_rating', record.ratings.aftertaste_rating || 0);
+
+                // Manually trigger ratio calculation after applying recipe
+                this.calculateBrewRatios();
             }
 
             resetForm() {
@@ -1419,7 +1435,7 @@
                         el.value = '';
                     }
                 });
-                this.setRating('satisfaction', 0);
+                Object.keys(this.ratings).forEach(key => this.setRating(key, 0));
                 document.getElementById('editing-record-id').value = '';
                 document.getElementById('save-btn').textContent = '💾 記録を保存';
                 this.setDefaultBrewDateTime();
@@ -1435,40 +1451,22 @@
                 const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
                 el.value = localDate.toISOString().slice(0, 16);
             }
+             
+            calculateBrewRatios() {
+                const beanWeightEl = document.getElementById('bean-weight');
+                const ratioEl = document.getElementById('brew-ratio');
+                const waterWeightEl = document.getElementById('water-weight');
 
-            
-            // --- Sheets ---
-            async sendToSpreadsheet(record) {
-                if (!this.sheetUrl) return;
-                
-                const method = this.methods.find(m => m.name === record.recipe.extractionMethod);
-                const totalTime = method ? method.totalTime : null;
+                const beanWeight = parseFloat(beanWeightEl.value);
+                const ratio = parseFloat(ratioEl.value);
+                const waterWeight = parseFloat(waterWeightEl.value);
 
-                const flatData = {
-                    date: new Date(record.date).toLocaleString('ja-JP'),
-                    beanType: record.recipe.beanType, beanWeight: record.recipe.beanWeight, grindSize: record.recipe.grindSize,
-                    dripper: record.recipe.dripper, waterWeight: record.recipe.waterWeight, waterTemperature: record.recipe.waterTemperature,
-                    extractionMethod: record.recipe.extractionMethod,
-                    totalTime: totalTime,
-                    theme: record.details.theme,
-                    summary: record.details.summary, impression: record.tasting.impression, mouthfeel: record.tasting.mouthfeel,
-                    aftertaste: record.tasting.aftertaste, temperatureChange: record.tasting.temperatureChange,
-                    acidityBitterness: record.tasting.acidityBitterness,
-                    richnessSoftness: record.tasting.richnessSoftness,
-                    satisfaction: record.ratings.satisfaction,
-                };
+                const focusedElId = document.activeElement.id;
 
-                try {
-                    await fetch(this.sheetUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(flatData)
-                    });
-                    this.showNotification('📝 スプレッドシートに記録を送信しました');
-                } catch (error) {
-                    console.error('Spreadsheet send error:', error);
-                    this.showNotification('⚠️ スプレッドシートへの送信に失敗しました', 'warning');
+                if ( (focusedElId === 'bean-weight' || focusedElId === 'brew-ratio') && beanWeight && ratio) {
+                    waterWeightEl.value = (beanWeight * ratio).toFixed(1);
+                } else if (focusedElId === 'water-weight' && waterWeight && ratio) {
+                    beanWeightEl.value = (waterWeight / ratio).toFixed(1);
                 }
             }
             
@@ -1476,7 +1474,7 @@
             generateAnalytics() { this.updateSatisfactionChart(); this.updateBeanChart(); this.updateBestRecipe(); }
             updateSatisfactionChart() { const ctx = document.getElementById('satisfactionChart').getContext('2d'); if (this.satisfactionChartInstance) this.satisfactionChartInstance.destroy(); const last30Days = Array.from({length: 30}).map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().split('T')[0]; }).reverse(); const satisfactionData = last30Days.map(date => { const dayRecords = this.records.filter(r => r.date.startsWith(date)); if (dayRecords.length === 0) return null; return dayRecords.reduce((sum, r) => sum + r.ratings.satisfaction, 0) / dayRecords.length; }); this.satisfactionChartInstance = new Chart(ctx, { type: 'line', data: { labels: last30Days.map(date => new Date(date).toLocaleDateString('ja-JP', {month: 'short', day: 'numeric'})), datasets: [{ label: '満足度', data: satisfactionData, borderColor: '#8B4513', backgroundColor: 'rgba(139, 69, 19, 0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10, ticks: { stepSize: 1 }}}, plugins: { legend: { display: false }}} }); }
             updateBeanChart() { const ctx = document.getElementById('beanChart').getContext('2d'); if (this.beanChartInstance) this.beanChartInstance.destroy(); const beanStats = this.records.reduce((acc, record) => { if (!record.recipe || !record.recipe.beanType) return acc; const beanType = record.recipe.beanType; if (!acc[beanType]) acc[beanType] = { count: 0, total: 0 }; acc[beanType].count++; acc[beanType].total += record.ratings.satisfaction; return acc; }, {}); const labels = Object.keys(beanStats); const avgRatings = labels.map(bean => beanStats[bean].total / beanStats[bean].count); this.beanChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: '平均満足度', data: avgRatings, backgroundColor: ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#D2B48C', '#BC8F8F', '#A0522D'] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 }}, plugins: { legend: { display: false }}} }); }
-            updateBestRecipe() { const container = document.getElementById('best-recipe'); const bestRecipe = [...this.records].filter(r => r.ratings && r.ratings.satisfaction >= 8).sort((a, b) => b.ratings.satisfaction - a.ratings.satisfaction)[0]; if (!bestRecipe || !bestRecipe.recipe) { container.innerHTML = '<p>満足度8以上の記録なし</p>'; return; } container.innerHTML = `<div style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 20px; border-radius: 10px; color: white;"><h4>🏆 ${bestRecipe.recipe.beanType}</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;"><div><strong>豆量:</strong> ${bestRecipe.recipe.beanWeight}g</div><div><strong>湯量:</strong> ${bestRecipe.recipe.waterWeight}g</div><div><strong>温度:</strong> ${bestRecipe.recipe.waterTemperature}°C</div><div><strong>メソッド:</strong> ${bestRecipe.recipe.extractionMethod}</div></div><div style="margin-top: 15px;"><strong>満足度:</strong> ${'★'.repeat(bestRecipe.ratings.satisfaction)}${'☆'.repeat(10 - bestRecipe.ratings.satisfaction)}</div><button onclick="applyRecipeById('${bestRecipe.date}')" style="margin-top: 15px; padding: 8px 16px; border: none; border-radius: 5px; background: rgba(255,255,255,0.3); color: white; cursor: pointer;">このレシピを適用</button></div>`; }
+            updateBestRecipe() { const container = document.getElementById('best-recipe'); const bestRecipe = [...this.records].filter(r => r.ratings && r.ratings.satisfaction >= 4).sort((a, b) => b.ratings.satisfaction - a.ratings.satisfaction)[0]; if (!bestRecipe || !bestRecipe.recipe) { container.innerHTML = '<p>満足度4以上の記録なし</p>'; return; } container.innerHTML = `<div style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 20px; border-radius: 10px; color: white;"><h4>🏆 ${bestRecipe.recipe.beanType}</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;"><div><strong>豆量:</strong> ${bestRecipe.recipe.beanWeight}g</div><div><strong>湯量:</strong> ${bestRecipe.recipe.waterWeight}g</div><div><strong>温度:</strong> ${bestRecipe.recipe.waterTemperature}°C</div><div><strong>メソッド:</strong> ${bestRecipe.recipe.extractionMethod}</div></div><div style="margin-top: 15px;"><strong>満足度:</strong> ${'★'.repeat(bestRecipe.ratings.satisfaction)}${'☆'.repeat(5 - bestRecipe.ratings.satisfaction)}</div><button onclick="applyRecipeById('${bestRecipe.date}')" style="margin-top: 15px; padding: 8px 16px; border: none; border-radius: 5px; background: rgba(255,255,255,0.3); color: white; cursor: pointer;">このレシピを適用</button></div>`; }
             
             updateTasteChartFilter() {
                 const container = document.getElementById('taste-chart-filter-container');
@@ -1507,7 +1505,7 @@
                 const datasets = this.beans
                     .filter(bean => selectedBeans.includes(bean.name))
                     .map((bean, index) => {
-                        const beanRecords = this.records.filter(r => r.recipe.beanType === bean.name && r.tasting.acidityBitterness && r.tasting.richnessSoftness);
+                        const beanRecords = this.records.filter(r => r.recipe.beanType === bean.name && r.ratings.aroma);
                         const colorPalette = ['#8B4513', '#D2691E', '#CD853F', '#A0522D', '#DEB887', '#BC8F8F', '#F4A460', '#D2B48C'];
                         
                         return {
@@ -1680,9 +1678,10 @@
                                 <p><strong>メソッド:</strong> ${record.recipe.extractionMethod}</p>
                                 </div>
                             </div>
-                            <div class="record-item-actions">
-                                <button class="btn btn-secondary" onclick="showRecordDetails('${record.date}')">詳細</button>
-                                <button class="btn btn-secondary" onclick="editRecord('${record.date}')">編集</button>
+                            <div class="record-item-actions btn-group" style="flex-direction: row; align-items: center; justify-content: center; gap: 5px;">
+                                <button class="btn btn-secondary btn-small" onclick="showRecordDetails('${record.date}')">詳細</button>
+                                <button class="btn btn-secondary btn-small" onclick="editRecord('${record.date}')">編集</button>
+                                <button class="btn-danger btn-small" onclick="deleteRecord('${record.date}')">削除</button>
                             </div>
                         </div>`;
                 }).join('');
@@ -2048,9 +2047,6 @@
             }
 
             // --- Presets ---
-            updatePresetsDisplay() { const container = document.getElementById('preset-buttons'); if (this.presets.length === 0) { container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">プリセットなし</p>'; return; } container.innerHTML = this.presets.map((preset, index) => `<div class="preset-btn" onclick="applyPreset(${index})"><strong>${preset.name}</strong><br><small>${preset.recipe.beanType} | ${preset.recipe.beanWeight}g</small></div>`).join(''); }
-            saveAsPreset() { const name = prompt('プリセット名を入力:'); if (!name) return; const record = this.getCurrentRecipe(); record.name = name; this.presets.push(record); this.savePresets(); this.updatePresetsDisplay(); this.showNotification('⚙️ プリセットを保存しました'); }
-            
             showNotification(message, type = 'success') { const n = document.getElementById('notification'); n.textContent = message; n.className = `notification show ${type}`; setTimeout(() => n.classList.remove('show'), 3000); }
         }
 
@@ -2064,13 +2060,13 @@
             if (tabName === 'taste-chart') setTimeout(() => coffeeLogger.updateTasteMapChart(), 100);
             if (tabName === 'history') coffeeLogger.updateHistoryDisplay();
         }
-
+        function deleteRecord(recordDate) { coffeeLogger.deleteRecord(recordDate); }
         function handleSaveClick() { coffeeLogger.handleSaveClick(); }
+        function showBeanDetails(index) { /* 今後のステップで作成します */ alert('詳細は今後のアップデートで実装します！'); }
+        function editBean(index) { /* 今後のステップで作成します */ alert('編集は今後のアップデートで実装します！'); }
         function loadLastRecipe() { coffeeLogger.loadLastRecipe(); }
-        function saveAsPreset() { coffeeLogger.saveAsPreset(); }
         function addBean() { coffeeLogger.addBean(); }
         function deleteBean(index) { coffeeLogger.deleteBean(index); }
-        function applyPreset(index) { coffeeLogger.applyRecipe(coffeeLogger.presets[index]); }
         function applyRecipeById(date) {
             const record = coffeeLogger.records.find(r => r.date === date);
             if(record) coffeeLogger.applyRecipe(record);
