@@ -514,7 +514,7 @@
         
         .modal-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
         
@@ -910,6 +910,13 @@
                         <button class="btn btn-primary" onclick="addOrUpdateBean()">＋ 豆を登録</button>
                     </div>
                 </div>
+                <h3>バックアップ / 乗り換え</h3>
+                <p>Safari で貯めたデータ → PWA へ引っ越しできます。</p>
+                <div class="btn-group" style="margin-top:10px">
+                    <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSON()">JSONエクスポート（ファイル）</button>
+                    <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSONToClipboard()">JSONをコピー（簡単）</button>
+                    <button class="btn btn-primary btn-small" onclick="showImportModal()">JSONインポート</button>
+                </div>
                 <div id="bean-list-container" style="margin-top: 20px;">
                 </div>
             </div>
@@ -963,6 +970,19 @@
 
     <div id="notification" class="notification"></div>
 
+    <div id="import-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="hideImportModal()">&times;</span>
+            <h3>データをインポート</h3>
+            <p>エクスポートしたデータを下の欄に貼り付けてください。</p>
+            <div class="form-group">
+                <textarea id="import-data-area" class="form-control" rows="8" placeholder="ここにデータを貼り付け..."></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="importData()">インポートを実行</button>
+            </div>
+        </div>
+    </div>
     <script>
         class CoffeeLogger {
             constructor() {
@@ -1758,6 +1778,81 @@
                 n.className = `notification show ${type === 'warning' ? 'warning' : ''}`; 
                 setTimeout(() => n.classList.remove('show'), 3000); 
             }
+
+            // --- JSON エクスポート（ファイル保存） ---
+            exportJSON() {
+            const data = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                records: this.records,
+                beans: this.beans,
+                methods: this.methods
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "coffee-diary-backup.json";
+            a.click();
+            URL.revokeObjectURL(url);
+            this.showNotification("💾 JSON を保存しました");
+            }
+
+            // --- JSON をクリップボードへ（iPhoneに優しい） ---
+            async exportJSONToClipboard() {
+            const data = {
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                records: this.records,
+                beans: this.beans,
+                methods: this.methods
+            };
+            const text = JSON.stringify(data, null, 2);
+            try {
+                await navigator.clipboard.writeText(text);
+                this.showNotification("📋 JSON をクリップボードにコピーしました");
+            } catch (e) {
+                // クリップボード不可な環境はモーダルに貼り付けて見せる
+                document.getElementById("import-data-area").value = text;
+                showImportModal();
+                this.showNotification("👀 テキスト欄に表示しました。ここからコピーしてください");
+            }
+            }
+
+            // --- JSON インポート（モーダルのテキスト欄から） ---
+            importJSONFromTextarea() {
+            try {
+                const text = document.getElementById("import-data-area").value.trim();
+                const data = JSON.parse(text);
+                if (!data.records || !data.beans || !data.methods) throw new Error("フォーマットが不正です");
+
+                // 置き換え
+                this.records = data.records;
+                this.beans   = data.beans;
+                this.methods = data.methods;
+
+                // 保存
+                this.saveRecords(); this.saveBeans(); this.saveMethods();
+
+                // 再描画
+                this.updateSummaryStats();
+                this.updateHistoryDisplay();
+                this.updateBeanManagementUI();
+                this.updateBeanSelectionDropdown();
+                this.updateMethodManagementUI();
+                this.updateMethodSelectionDropdown();
+                this.updateTasteChartFilter();
+                this.generateAnalytics();
+                this.renderRadarCharts();
+
+                hideImportModal();
+                this.showNotification("✅ JSON から復元しました");
+            } catch (e) {
+                this.showNotification("⚠️ インポート失敗: " + e.message, "warning");
+            }
+            }
+
+
         }
 
         // --- Global Helper Functions ---
