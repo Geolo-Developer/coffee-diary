@@ -839,7 +839,16 @@
         </div>
 
         <div id="settings" class="tab-content">
-             <div class="card">
+            <div class="card">
+                <h3>バックアップ / 乗り換え</h3>
+                <p>Safari で貯めたデータ → PWA へ引っ越しできます。</p>
+                <div class="btn-group" style="margin-top:10px">
+                <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSON()">JSONエクスポート（ファイル）</button>
+                <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSONToClipboard()">JSONをコピー（簡単）</button>
+                <button class="btn btn-primary btn-small" onclick="showImportModal()">JSONインポート</button>
+                </div>
+            </div> 
+            <div class="card">
                 <h3>MY BEANS</h3>
                 <p>お持ちのコーヒー豆を登録・管理します。</p>
                 <div class="api-settings"> 
@@ -910,13 +919,7 @@
                         <button class="btn btn-primary" onclick="addOrUpdateBean()">＋ 豆を登録</button>
                     </div>
                 </div>
-                <h3>バックアップ / 乗り換え</h3>
-                <p>Safari で貯めたデータ → PWA へ引っ越しできます。</p>
-                <div class="btn-group" style="margin-top:10px">
-                    <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSON()">JSONエクスポート（ファイル）</button>
-                    <button class="btn btn-secondary btn-small" onclick="coffeeLogger.exportJSONToClipboard()">JSONをコピー（簡単）</button>
-                    <button class="btn btn-primary btn-small" onclick="showImportModal()">JSONインポート</button>
-                </div>
+                
                 <div id="bean-list-container" style="margin-top: 20px;">
                 </div>
             </div>
@@ -1979,6 +1982,17 @@
                 });
             });
         }
+    </script>
+    <script>
+    function showImportModal(){
+        document.getElementById('import-modal').style.display = 'block';
+    }
+    function hideImportModal(){
+        document.getElementById('import-modal').style.display = 'none';
+    }
+    function importData(){
+        coffeeLogger.importJSONFromTextarea();
+    }
     </script>
 </body>
 </html>
