@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coffee-log-cache-v1';
+const CACHE_NAME = 'coffee-log-cache-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -26,3 +26,6 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
