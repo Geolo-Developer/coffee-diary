@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>コーヒー物語日記</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+   
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B4513"/>
+
+    <!-- iOS向け（インストールUIは手動） -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
     <style>
         * {
             margin: 0;
@@ -1863,6 +1872,18 @@
 
         let coffeeLogger;
         document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
