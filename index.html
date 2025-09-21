@@ -677,7 +677,7 @@
                         <div class="form-group">
                             <label for="dripper">ドリッパー</label>
                              <select id="dripper" class="form-control">
-                                <option value="V60円錐ペーパーフィルター">V60円錐ペーパーフィルター</option>
+                                <option value="V60円錐ペーパーフィルター">HARIO V60</option>
                                 <option value="台形ペーパーフィルター">台形ペーパーフィルター</option>
                                 <option value="ステンレスフィルター">ステンレスフィルター</option>
                                 <option value="その他">その他</option>
@@ -891,6 +891,10 @@
                         <div class="form-group">
                             <label for="purchase-date">購入日</label>
                             <input type="date" id="purchase-date" class="form-control">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="bean-memo">豆の特徴や感じたことのメモ</label>
+                            <textarea id="bean-memo" class="form-control" rows="4" placeholder="例：フローラルな香り、ベリーのような酸味と甘さ。後味はすっきりしている。"></textarea>
                         </div>
                     </div>
                     <div id="bean-form-buttons" class="btn-group">
@@ -1586,10 +1590,10 @@
                 stepElement.innerHTML = `
                     <select class="form-control" ${isFirstStep ? 'disabled' : ''}>
                         ${isFirstStep ? '<option>蒸らす</option>' : `
-                        <option value="お湯を注ぐ">お湯を注ぐ</option>
                         <option value="円を描くように注ぐ">円を描くように注ぐ</option>
-                        <option value="待つ">待つ</option>
                         <option value="カップを揺らす">カップを揺らす</option>
+                        <option value="待つ">待つ</option>
+                        <option value="かき混ぜる">かき混ぜる</option>
                         `}
                     </select>
                     <div class="time-input-group" ${isFirstStep ? 'style="visibility: hidden;"' : ''}>
