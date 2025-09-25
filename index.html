@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="./style.css?v=12">
 
 </head>
 <body>
@@ -422,11 +422,11 @@
         </div>
     </div>
     <!-- Supabase SDK（先に読み込む） -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <!-- Chart.js（必要なら1回だけ） -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
     <!-- あなたのJS（最後）※キャッシュ避けに ?v= を上げる -->
-    <script defer src="script.js?v=12"></script>
+    <script src="script.js?v=12" defer></script>
 
 </body>
 </html>
