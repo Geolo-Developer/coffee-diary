@@ -1060,6 +1060,80 @@ class CoffeeLogger {
         let coffeeLogger;
         document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); window.coffeeLogger = coffeeLogger;
 
+        document.addEventListener('DOMContentLoaded', () => {
+        // 既存: coffeeLogger 初期化
+        if (!window.coffeeLogger) {
+            // もう初期化済みならこの行は不要
+            window.coffeeLogger = new CoffeeLogger();
+        }
+
+        const emailInput = document.getElementById('login-email');
+        const statusEl   = document.getElementById('auth-status');
+
+        // 1) メールリンクを送る
+        document.getElementById('btn-send-link')?.addEventListener('click', async () => {
+            const email = (emailInput?.value || '').trim();
+            if (!email) return coffeeLogger.showNotification('📮 メールを入力してください', 'warning');
+
+            try {
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                // GitHub Pages のパスまで含める（例: https://name.github.io/repo/index.html）
+                emailRedirectTo: `${location.origin}${location.pathname}`
+                }
+            });
+            if (error) throw error;
+            statusEl.textContent = '送信しました。メール内のリンクを開いてください。';
+            coffeeLogger.showNotification('✉️ メールを送りました');
+            } catch (e) {
+            console.error(e);
+            statusEl.textContent = 'エラー: ' + e.message;
+            coffeeLogger.showNotification('⚠️ 送信に失敗: ' + e.message, 'warning');
+            }
+        });
+
+        // 2) 6桁コードでログイン（PWAでも完結）
+        document.getElementById('btn-verify-otp')?.addEventListener('click', async () => {
+            const email = (emailInput?.value || '').trim();
+            const token = (document.getElementById('otp-code')?.value || '').trim();
+            if (!email || !token) return coffeeLogger.showNotification('メールと6桁コードを入力', 'warning');
+
+            try {
+            const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+            if (error) throw error;
+            statusEl.textContent = 'ログインしました。';
+            coffeeLogger.showNotification('🔓 ログイン成功');
+            } catch (e) {
+            console.error(e);
+            statusEl.textContent = 'エラー: ' + e.message;
+            coffeeLogger.showNotification('⚠️ 検証に失敗: ' + e.message, 'warning');
+            }
+        });
+
+        // 3) メール“リンク”で戻ってきたときのセッション交換
+        (async () => {
+            try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+            if (!error && data?.session) {
+                statusEl.textContent = 'ログインしました。';
+                coffeeLogger.showNotification('🔓 ログイン成功');
+                // URLの ?code=... を消す
+                history.replaceState({}, document.title, location.pathname);
+            }
+            } catch (e) {
+            // 何もしない（codeが無いときはここに来ます）
+            }
+        })();
+
+        // 4) 状態変化でUIを切り替えたい場合（必要なら利用）
+        supabase.auth.onAuthStateChange((_event, session) => {
+            document.body.dataset.auth = session ? 'in' : 'out';
+            // 例: ログイン時だけ設定タブを有効化…など
+        });
+        });
+
+
         // 起動時に、ログイン済みならクラウドから読み込み
         (async () => { try { await coffeeLogger.loadFromCloud(); } catch (e) { console.error(e); } })(); });
 
