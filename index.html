@@ -22,6 +22,21 @@
         <div class="header">
             <h1>☕ Daily Brew Logger</h1>
             <p class="subtitle">毎日のコーヒー抽出を記録・分析して、理想の一杯を追求しよう</p>
+
+            <div id="auth-box" class="card" style="margin-top:12px;">
+                <div id="auth-signed-out">
+                    <input type="email" id="login-email" class="form-control" placeholder="メールアドレス">
+                    <div class="btn-group" style="margin-top:10px">
+                        <button class="btn btn-primary btn-small" onclick="signIn()">ログイン（メールリンク）</button>
+                    </div>
+                </div>
+                <div id="auth-signed-in" style="display:none">
+                    <span id="user-email" style="margin-right:8px;"></span>
+                    <button class="btn btn-secondary btn-small" onclick="signOut()">ログアウト</button>
+                    <button class="btn btn-secondary btn-small" onclick="syncFromSupabase()">クラウド→端末 同期</button>
+                    <button class="btn btn-secondary btn-small" onclick="pushLocalToSupabase()">端末→クラウド 一括アップ</button>
+                </div>
+            </div>
         </div>
 
         <div class="nav-tabs">
@@ -392,8 +407,9 @@
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
-    <script src="script.js?v=3" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="script.js?v=3"></script>
 
 </body>
 </html>

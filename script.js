@@ -1,4 +1,10 @@
 'use strict';
+
+const { createClient } = window.supabase; // CDNで読み込むと window.supabase が使える
+const SUPABASE_URL = 'https://vnprfwqdbkpyfkntldle.supabase.co';     // ←あなたのURL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZucHJmd3FkYmtweWZrbnRsZGxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NjkwNDMsImV4cCI6MjA3NDM0NTA0M30.xuRt0plwGHwNVHA09DLZqlRuFpDsMZLAF20s4RhNvdw'; // ←あなたのAnon Key
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 class CoffeeLogger {
 
             constructor() {
@@ -124,6 +130,74 @@ class CoffeeLogger {
                 const stars = document.querySelectorAll(`[data-rating="${type}"] .star`);
                 stars.forEach((star, index) => star.classList.toggle('active', index < value));
             }
+
+            // --- Cloud Storage Handlers（Supabase） ---
+            async saveToCloud() {
+            // 1) ユーザーがログイン済みか確認
+            const { data: userData, error: userErr } = await sb.auth.getUser();
+            const user = userData?.user;
+            if (userErr || !user) {
+                this.showNotification('⚠️ ログインしていません（クラウド保存しません）', 'warning');
+                return;
+            }
+
+            // 2) 保存するデータ（localStorageと同じ形）
+            const payload = {
+                user_id: user.id,
+                records: this.records,
+                beans:   this.beans,
+                methods: this.methods,
+                updated_at: new Date().toISOString()
+            };
+
+            // 3) アップサート（なければINSERT/あればUPDATE）
+            const { error } = await sb
+                .from('coffee_data')
+                .upsert(payload, { onConflict: 'user_id' }); // user_idをユニークにしておく
+
+            if (error) {
+                this.showNotification('⚠️ クラウド保存に失敗: ' + error.message, 'warning');
+                return;
+            }
+            this.showNotification('☁️ クラウドに同期しました');
+            }
+
+            async loadFromCloud() {
+            const { data: userData } = await sb.auth.getUser();
+            const user = userData?.user;
+            if (!user) return; // 未ログイン時は何もしない
+
+            const { data, error } = await sb
+                .from('coffee_data')
+                .select('records, beans, methods')
+                .eq('user_id', user.id)
+                .maybeSingle(); // データが無い時は data: null / error: null
+
+            if (error) {
+                this.showNotification('⚠️ クラウド読込に失敗: ' + error.message, 'warning');
+                return;
+            }
+            if (!data) return; // まだクラウドに何も無い
+
+            // 取得したデータで置き換え + 画面再描画
+            this.records = data.records || [];
+            this.beans   = data.beans   || [];
+            this.methods = data.methods || [];
+            this.saveRecords(); this.saveBeans(); this.saveMethods();
+
+            this.updateSummaryStats();
+            this.updateHistoryDisplay();
+            this.updateBeanManagementUI();
+            this.updateBeanSelectionDropdown();
+            this.updateMethodManagementUI();
+            this.updateMethodSelectionDropdown();
+            this.updateTasteChartFilter();
+            this.generateAnalytics();
+            this.renderRadarCharts();
+
+            this.showNotification('☁️ クラウドから読み込みました');
+            }
+
 
             // --- Bean Management ---
             updateBeanManagementUI() {
@@ -282,7 +356,7 @@ class CoffeeLogger {
 
                 this.records.unshift(record);
                 this.saveRecords();
-                
+                this.saveToCloud().catch(() => {});
                 this.updateSummaryStats();
                 this.updateHistoryDisplay();
                 this.generateAnalytics();
@@ -300,7 +374,7 @@ class CoffeeLogger {
                 
                 this.records[recordIndex] = updatedRecord;
                 this.saveRecords();
-                
+                this.saveToCloud().catch(() => {});
                 this.updateSummaryStats();
                 this.updateHistoryDisplay();
                 this.generateAnalytics();
@@ -316,6 +390,7 @@ class CoffeeLogger {
                     if (recordIndex > -1) {
                         this.records.splice(recordIndex, 1);
                         this.saveRecords();
+                        this.saveToCloud().catch(() => {});
                         this.updateHistoryDisplay();
                         this.updateSummaryStats();
                         this.generateAnalytics();
@@ -983,7 +1058,41 @@ class CoffeeLogger {
         function resetDripTimer() { coffeeLogger.resetDripTimer(); }
 
         let coffeeLogger;
-        document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); window.coffeeLogger = coffeeLogger;});
+        document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); window.coffeeLogger = coffeeLogger;
+
+        // 起動時に、ログイン済みならクラウドから読み込み
+        (async () => { try { await coffeeLogger.loadFromCloud(); } catch (e) { console.error(e); } })(); });
+
+        // メールアドレスに魔法リンクを送る例
+        async function loginWithEmail(email) {
+        if (!email) return alert('メールアドレスを入力してください');
+        const { error } = await sb.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: window.location.origin }
+        });
+        if (error) {
+            alert('ログイン失敗: ' + error.message);
+        } else {
+            alert('ログイン用リンクをメールで送りました。届いたリンクをタップしてください。');
+        }
+        }
+        window.loginWithEmail = loginWithEmail;
+
+        // ログアウト
+        async function logout() {
+        await sb.auth.signOut();
+        alert('ログアウトしました');
+        }
+        window.logout = logout;
+
+        // 手動同期ボタン用（任意）
+        async function syncNow() {
+        if (!window.coffeeLogger) return;
+        await window.coffeeLogger.saveToCloud();
+        }
+        window.syncNow = syncNow;
+
+
 
          if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
