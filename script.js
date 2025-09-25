@@ -1,4 +1,6 @@
-nt. class CoffeeLogger {
+'use strict';
+class CoffeeLogger {
+
             constructor() {
                 this.records = this.loadRecords();
                 this.beans = this.loadBeans();
@@ -908,7 +910,7 @@ nt. class CoffeeLogger {
             const record = coffeeLogger.records.find(r => r.date === recordDate);
             const contentSlot = document.getElementById('modal-content-slot');
             const ratingsHTML = Object.entries(record.ratings).map(([key, value]) => {
-                const label = {satisfaction: '総合満足度', aroma: '香り', acidity: '酸味', sweetness: '甘さ', bitterness: '苦み', body: 'ボディ', aftertaste: '余韻'}[key];
+                const label = {satisfaction:'総合満足度',aroma:'香り',acidity:'酸味',sweetness:'甘さ',bitterness:'苦み',body:'ボディ',aftertaste:'余韻'}[key];
                 return `<p><strong>${label}:</strong> ${'★'.repeat(value)}${'☆'.repeat(5 - value)}</p>`;
             }).join('');
 
@@ -916,30 +918,31 @@ nt. class CoffeeLogger {
                 <span class="modal-close" onclick="hideModal()">&times;</span>
                 <h3>抽出レシピ詳細</h3>
                 <div class="modal-grid">
-                    <fieldset>
-                        <legend>抽出レシピ</legend>
-                        <p><strong>抽出日時:</strong> ${new Date(record.date).toLocaleString('ja-JP')}</p>
-                        <p><strong>豆の種類:</strong> ${record.recipe.beanType}</p>
-                        <p><strong>豆の量:</strong> ${record.recipe.beanWeight}g</p>
-                        <p><strong>比率:</strong> 1:${record.recipe.brewRatio}</p>
-                        <p><strong>お湯の量:</strong> ${record.recipe.waterWeight}g</p>
-                        <p><strong>挽き目:</strong> ${record.recipe.grindSize}</p>
-                        <p><strong>湯温:</strong> ${record.recipe.waterTemperature}℃</p>
-                        <p><strong>抽出メソッド:</strong> ${record.recipe.extractionMethod}</p>
-                    </fieldset>
-                    <fieldset>
-                        <legend>テイスティングノート</legend>
-                        ${ratingsHTML}
-                    </fieldset>
-                    <fieldset style="grid-column: 1 / -1;">
-                        <legend>詳細</legend>
-                        <p><strong>今日のテーマ:</strong> ${record.details.theme}</p>
-                        <p><strong>サマリー:</strong> ${record.details.summary}</p>
-                    </fieldset>
+                <fieldset>
+                    <legend>抽出レシピ</legend>
+                    <p><strong>抽出日時:</strong> ${new Date(record.date).toLocaleString('ja-JP')}</p>
+                    <p><strong>豆の種類:</strong> ${record.recipe.beanType}</p>
+                    <p><strong>豆の量:</strong> ${record.recipe.beanWeight}g</p>
+                    <p><strong>比率:</strong> 1:${record.recipe.brewRatio}</p>
+                    <p><strong>お湯の量:</strong> ${record.recipe.waterWeight}g</p>
+                    <p><strong>挽き目:</strong> ${record.recipe.grindSize}</p>
+                    <p><strong>湯温:</strong> ${record.recipe.waterTemperature}℃</p>
+                    <p><strong>抽出メソッド:</strong> ${record.recipe.extractionMethod}</p>
+                </fieldset>
+                <fieldset>
+                    <legend>テイスティングノート</legend>
+                    ${ratingsHTML}
+                </fieldset>
+                <fieldset style="grid-column: 1 / -1;">
+                    <legend>詳細</legend>
+                    <p><strong>今日のテーマ:</strong> ${record.details.theme}</p>
+                    <p><strong>サマリー:</strong> ${record.details.summary}</p>
+                </fieldset>
                 </div>
             `;
             showModal();
         }
+
 
         function editRecordFromHistory(recordDate) {
             const record = coffeeLogger.records.find(r => r.date === recordDate);
@@ -980,7 +983,7 @@ nt. class CoffeeLogger {
         function resetDripTimer() { coffeeLogger.resetDripTimer(); }
 
         let coffeeLogger;
-        documeaddEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); });
+        document.addEventListener('DOMContentLoaded', () => { coffeeLogger = new CoffeeLogger(); window.coffeeLogger = coffeeLogger;});
 
          if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
